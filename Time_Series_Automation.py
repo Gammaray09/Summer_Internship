@@ -13,6 +13,7 @@ def createData(speed, hatch):
     prevtime = 0
 
     check = False
+
     for x in range(11):
         curSpeed = speed
 
@@ -64,7 +65,7 @@ def createData(speed, hatch):
 
 
 def createXPos(speed):
-    prevPos = -0.015
+    prevPos = 0.02
     xPos.append(prevPos)
 
     i = 0
@@ -87,7 +88,7 @@ def createXPos(speed):
 
 def createYPos(hatch):
     speed = 125
-    prevPos = -0.015
+    prevPos = 0.02
     yPos.append(prevPos)
 
     i = 0
@@ -104,4 +105,4 @@ def createYPos(hatch):
         i = i + 1
 
 
-createData(1000, 0.01)
+createData(100, 0.013)
