@@ -1,11 +1,34 @@
+import numpy
+import csv
+
 xVel = []
 yVel = []
 xPos = []
 yPos = []
-time = [0]
+time = []
+timeStep = []
+numSteps = 355
+
+
+def readCsv():
+    xCsv = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-x.csv"
+    yCsv = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-y.csv"
+
+    with open(xCsv, "r") as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            time.append(float(row[0]))
+            xVel.append(float(row[1]))
+    with open(yCsv, "r") as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            yVel.append(float(row[1]))
 
 
 def createData(speed, hatch):
+    time.append(0)
+    timeStep.append(0)
+
     xduration = 0.1 / speed
     yduration = hatch / 125
 
@@ -52,57 +75,61 @@ def createData(speed, hatch):
     yVel.append(0)
     xVel.append(0)
 
-    createXPos(speed)
-    createYPos(hatch)
-
-    print("Speed:", speed, "     ", "Hatch:", hatch)
-    print("Time             X         Y")
-    print("----------------------------------")
-    i = 0
-    while i < len(time):
-        print(time[i], "    ", xPos[i], "   ", yPos[i])
-        i = i + 1
-
 
 def createXPos(speed):
-    prevPos = 0.02
+    dt = 0.00002
+    prevPos = 0
     xPos.append(prevPos)
 
     i = 0
-    while i < len(time) - 1:
-        if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
-            distance = (time[i + 1] - time[i]) * xVel[i]
-            prevPos += distance
-            xPos.append(round(prevPos, 6))
-        elif xVel[i] == speed and xVel[i + 1] == 0:
-            prevPos += 0.0001
-            xPos.append(round(prevPos, 6))
-        elif (xVel[i] * -1) == speed and xVel[i + 1] == 0:
-            prevPos -= 0.0001
-            xPos.append(round(prevPos, 6))
-        else:
-            xPos.append(round(prevPos, 6))
 
+    curTimeStep = 0
+
+    while i < len(time) - 1:
+        while time[i + 1] > curTimeStep:
+            if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
+                dx = dt * xVel[i]
+                prevPos += dx
+                xPos.append(round(prevPos, 6))
+            else:
+                xPos.append(round(prevPos, 6))
+            curTimeStep += dt
+            timeStep.append(round(curTimeStep, 6))
         i = i + 1
 
 
-def createYPos(hatch):
+def createYPos():
+    dt = 0.00002
     speed = 125
-    prevPos = 0.02
+    prevPos = 0
     yPos.append(prevPos)
 
     i = 0
-    while i < len(time):
-        if yVel[i] == speed and yVel[i + 1] == speed:
-            prevPos += hatch
-            yPos.append(round(prevPos, 6))
-        elif yVel[i] == speed and yVel[i + 1] == 0:
-            prevPos += 0.0001
-            yPos.append(round(prevPos, 6))
-        else:
-            yPos.append(round(prevPos, 6))
+
+    curTimeStep = timeStep[i]
+
+    while i < len(time) - 1:
+        while time[i + 1] > curTimeStep:
+            if yVel[i] == speed and yVel[i + 1] == speed:
+                dy = dt * yVel[i]
+                prevPos += dy
+                yPos.append(round(prevPos, 6))
+            else:
+                yPos.append(round(prevPos, 6))
+            curTimeStep += dt
 
         i = i + 1
 
 
-createData(100, 0.013)
+readCsv()
+# createData(100, 0.013)
+createXPos(100)
+createYPos()
+
+print("Speed:", 100, "     ", "Hatch:", 0.013)
+print("#       Time             X         Y")
+print("-------------------------------------")
+i = 0
+while i < len(timeStep):
+    print(i, "     ", timeStep[i], "        ", xPos[i], "   ", yPos[i])
+    i = i + 1
