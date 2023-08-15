@@ -94,7 +94,7 @@ def createXPos(speed):
             else:
                 xPos.append(round(prevPos, 6))
             curTimeStep += dt
-            timeStep.append(round(curTimeStep, 6))
+            timeStep.append(curTimeStep)
         i = i + 1
 
 
@@ -121,15 +121,32 @@ def createYPos():
         i = i + 1
 
 
-readCsv()
-# createData(100, 0.013)
+def fillValues():
+    dt = 0.00002
+    prevTime = timeStep[len(timeStep) - 1]
+    prevXPos = xPos[len(timeStep) - 1]
+    prevYPos = yPos[len(timeStep) - 1]
+
+    if len(timeStep) != numSteps:
+        while len(timeStep) != numSteps + 1:
+            prevTime += dt
+            timeStep.append(prevTime)
+            xPos.append(prevXPos)
+            yPos.append(prevYPos)
+
+
+# readCsv()
+createData(100, 0.013)
 createXPos(100)
 createYPos()
+fillValues()
 
 print("Speed:", 100, "     ", "Hatch:", 0.013)
 print("#       Time             X         Y")
 print("-------------------------------------")
 i = 0
 while i < len(timeStep):
-    print(i, "     ", timeStep[i], "        ", xPos[i], "   ", yPos[i])
+    time = timeStep[i]
+    scientific_notation = format(time, ".2e")
+    print(i, "     ", scientific_notation, "        ", xPos[i], "   ", yPos[i])
     i = i + 1

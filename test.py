@@ -10,7 +10,9 @@ xVel = []
 yVel = []
 xPos = []
 yPos = []
-timeValues = [0]
+timeValues = []
+timeStep = []
+numSteps = 355
 
 
 def runProcessing():
@@ -655,8 +657,8 @@ def runProcessing():
 
     animationScene = GetAnimationScene()
 
-    for i in range(len(timeValues)):
-        animationScene.AnimationTime = timeValues[i]
+    for i in range(len(timeStep)):
+        animationScene.AnimationTime = timeStep[i]
         renderView1.Update()
 
         # Calculate new camera position, focal point, and view up based on the time value
@@ -760,42 +762,46 @@ def generateData(speed, hatch):
 
 
 def createXPos(speed):
-    prevPos = 0.02
+    dt = 0.00002
+    prevPos = 0
     xPos.append(prevPos)
 
     i = 0
-    while i < len(timeValues) - 1:
-        if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
-            distance = (timeValues[i + 1] - timeValues[i]) * xVel[i]
-            prevPos += distance
-            xPos.append(round(prevPos, 6))
-        elif xVel[i] == speed and xVel[i + 1] == 0:
-            prevPos += 0.0001
-            xPos.append(round(prevPos, 6))
-        elif (xVel[i] * -1) == speed and xVel[i + 1] == 0:
-            prevPos -= 0.0001
-            xPos.append(round(prevPos, 6))
-        else:
-            xPos.append(round(prevPos, 6))
 
+    curTimeStep = 0
+
+    while i < len(timeValues) - 1:
+        while timeValues[i + 1] > curTimeStep:
+            if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
+                dx = dt * xVel[i]
+                prevPos += dx
+                xPos.append(round(prevPos, 6))
+            else:
+                xPos.append(round(prevPos, 6))
+            curTimeStep += dt
+            timeStep.append(round(curTimeStep, 6))
         i = i + 1
 
 
-def createYPos(hatch):
+def createYPos():
+    dt = 0.00002
     speed = 125
-    prevPos = 0.02
+    prevPos = 0
     yPos.append(prevPos)
 
     i = 0
-    while i < len(timeValues):
-        if yVel[i] == speed and yVel[i + 1] == speed:
-            prevPos += hatch
-            yPos.append(round(prevPos, 6))
-        elif yVel[i] == speed and yVel[i + 1] == 0:
-            prevPos += 0.0001
-            yPos.append(round(prevPos, 6))
-        else:
-            yPos.append(round(prevPos, 6))
+
+    curTimeStep = timeStep[i]
+
+    while i < len(timeValues) - 1:
+        while timeValues[i + 1] > curTimeStep:
+            if yVel[i] == speed and yVel[i + 1] == speed:
+                dy = dt * yVel[i]
+                prevPos += dy
+                yPos.append(round(prevPos, 6))
+            else:
+                yPos.append(round(prevPos, 6))
+            curTimeStep += dt
 
         i = i + 1
 

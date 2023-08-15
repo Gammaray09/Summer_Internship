@@ -56,7 +56,7 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
 
     datTraj = {"t": t, "x": x, "y": y, "vx": vx, "vy": vy, "p": p, "pOn": pOn}
 
-    print(p)
+    print(y)
 
     return datTraj
 
