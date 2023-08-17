@@ -8,16 +8,17 @@ from paraview.simple import *
 
 xVel = []
 yVel = []
-xPos = []
-yPos = []
+camXPos = []
+camYPos = []
+clipXPos = []
+clipYPos = []
 timeValues = []
-timeStep = []
+timeStep = [0]
 numSteps = 355
 
 
 def runProcessing():
-    generateData(100, 0.013)
-
+    ResetSession()
     #### disable automatic camera reset on 'Show'
     paraview.simple._DisableFirstRenderCameraReset()
 
@@ -625,6 +626,21 @@ def runProcessing():
 
     # get color transfer function/color map for 'SolidificationTime'
     solidificationTimeLUT = GetColorTransferFunction("SolidificationTime")
+    solidificationTimeLUT.RGBPoints = [
+        9.891147101370734e-07,
+        0.231373,
+        0.298039,
+        0.752941,
+        0.0034944820468467697,
+        0.865003,
+        0.865003,
+        0.865003,
+        0.006987974978983402,
+        0.705882,
+        0.0156863,
+        0.14902,
+    ]
+    solidificationTimeLUT.ScalarRangeInitialized = 1.0
 
     # Hide the scalar bar for this color map if no visible data is colored by it.
     HideScalarBarIfNotNeeded(solidificationTimeLUT, renderView1)
@@ -637,17 +653,118 @@ def runProcessing():
 
     # get opacity transfer function/opacity map for 'Temperature'
     temperaturePWF = GetOpacityTransferFunction("Temperature")
+    temperaturePWF.Points = [
+        423.025146484375,
+        0.0,
+        0.5,
+        0.0,
+        1841.5760498046875,
+        1.0,
+        0.5,
+        0.0,
+    ]
+    temperaturePWF.ScalarRangeInitialized = 1
 
-    # Properties modified on animationScene1
-    animationScene1.AnimationTime = 0.0
+    # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
+    temperatureLUT.ApplyPreset("X Ray", True)
 
-    # get the time-keeper
-    timeKeeper1 = GetTimeKeeper()
+    # invert the transfer function
+    temperatureLUT.InvertTransferFunction()
 
+    # create a new 'Clip'
+    clip1 = Clip(registrationName="Clip1", Input=fluid)
+    clip1.ClipType = "Plane"
+    clip1.HyperTreeGridClipper = "Plane"
+    clip1.Scalars = ["POINTS", "Pressure"]
+    clip1.Value = 5618517.0
+
+    # init the 'Plane' selected for 'ClipType'
+    clip1.ClipType.Origin = [
+        0.07005737855433836,
+        0.06995093158184318,
+        0.006651218282058835,
+    ]
+
+    # init the 'Plane' selected for 'HyperTreeGridClipper'
+    clip1.HyperTreeGridClipper.Origin = [
+        0.07005737855433836,
+        0.06995093158184318,
+        0.006651218282058835,
+    ]
+
+    # toggle 3D widget visibility (only when running from the GUI)
+    Show3DWidgets(proxy=clip1.ClipType)
+
+    # toggle 3D widget visibility (only when running from the GUI)
+    Hide3DWidgets(proxy=clip1.ClipType)
+
+    # Properties modified on clip1
+    clip1.ClipType = "Box"
+
+    # Properties modified on clip1.ClipType
+    clip1.ClipType.Length = [0.07, 0.07, 0.07]
+
+    # show data in view
+    clip1Display = Show(clip1, renderView1, "UnstructuredGridRepresentation")
+
+    # trace defaults for the display properties.
+    clip1Display.Representation = "Surface"
+    clip1Display.ColorArrayName = ["POINTS", "Temperature"]
+    clip1Display.LookupTable = temperatureLUT
+    clip1Display.SelectTCoordArray = "None"
+    clip1Display.SelectNormalArray = "Normals"
+    clip1Display.SelectTangentArray = "None"
+    clip1Display.OSPRayScaleArray = "Normals"
+    clip1Display.OSPRayScaleFunction = "PiecewiseFunction"
+    clip1Display.SelectOrientationVectors = "None"
+    clip1Display.ScaleFactor = 0.006999999868276064
+    clip1Display.SelectScaleArray = "None"
+    clip1Display.GlyphType = "Arrow"
+    clip1Display.GlyphTableIndexArray = "None"
+    clip1Display.GaussianRadius = 0.0003499999934138032
+    clip1Display.SetScaleArray = ["POINTS", "Normals"]
+    clip1Display.ScaleTransferFunction = "PiecewiseFunction"
+    clip1Display.OpacityArray = ["POINTS", "Normals"]
+    clip1Display.OpacityTransferFunction = "PiecewiseFunction"
+    clip1Display.DataAxesGrid = "GridAxesRepresentation"
+    clip1Display.PolarAxes = "PolarAxesRepresentation"
+    clip1Display.ScalarOpacityFunction = temperaturePWF
+    clip1Display.ScalarOpacityUnitDistance = 0.003282433238165534
+    clip1Display.OpacityArrayName = ["POINTS", "Normals"]
+
+    # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+    clip1Display.ScaleTransferFunction.Points = [
+        -1.0,
+        0.0,
+        0.5,
+        0.0,
+        0.9993227124214172,
+        1.0,
+        0.5,
+        0.0,
+    ]
+
+    # init the 'PiecewiseFunction' selected for 'OpacityTransferFunction'
+    clip1Display.OpacityTransferFunction.Points = [
+        -1.0,
+        0.0,
+        0.5,
+        0.0,
+        0.9993227124214172,
+        1.0,
+        0.5,
+        0.0,
+    ]
+
+    # hide data in view
+    Hide(fluid, renderView1)
     Hide(hotspots, renderView1)
 
-    # layout/tab size in pixels
-    # case1flsgrf6pmelt400p1000130um.SetSize(1391, 611)
+    # show color bar/color legend
+    clip1Display.SetScalarBarVisibility(renderView1, True)
+
+    # update the view to ensure updated data information
+    renderView1.Update()
 
     # current camera placement for renderView1
     renderView1.CameraPosition = [-0.015, -0.015, 0.12678054413808706]
@@ -657,22 +774,45 @@ def runProcessing():
 
     animationScene = GetAnimationScene()
 
+    numSteps = animationScene.EndTime + 1
+
+    print(numSteps)
+
+    createData(100, 0.013)
+    createXPos(100, 0.02, camXPos)
+    createYPos(0.02, camYPos)
+    createXPos(100, -0.015, clipXPos)
+    createYPos(-0.015, clipYPos)
+    fillValues()
+
+    i = 0
+    while i < len(timeStep):
+        time = timeStep[i]
+        scientific_notation = format(time, ".2e")
+        print(
+            i, "     ", scientific_notation, "        ", camXPos[i], "   ", camYPos[i]
+        )
+        i = i + 1
+
     for i in range(len(timeStep)):
         animationScene.AnimationTime = timeStep[i]
         renderView1.Update()
 
         # Calculate new camera position, focal point, and view up based on the time value
-        new_camera_position = [xPos[i], yPos[i], 0.39297822260506643]
-        new_camera_focal_point = [xPos[i], yPos[i], 0.006651218282058835]
+        new_camera_position = [camXPos[i], camXPos[i], 0.39297822260506643]
+        new_camera_focal_point = [camXPos[i], camYPos[i], 0.006651218282058835]
         new_camera_view_up = [0, 1, 0]
+        new_clip_position = [clipXPos[i], clipYPos[i], -0.01]
 
         renderView1.CameraPosition = new_camera_position
         renderView1.CameraFocalPoint = new_camera_focal_point
         renderView1.CameraViewUp = new_camera_view_up
+        clip1.ClipType.Position = new_clip_position
+        renderView1.Update()
         # save screenshot
 
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/data{i}.png",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output/data{i}.png",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1391, 611],
         )
@@ -703,7 +843,10 @@ def runProcessing():
     # alternatively, if you want to write images, you can use SaveScreenshot(...).
 
 
-def generateData(speed, hatch):
+def createData(speed, hatch):
+    timeValues.append(0)
+    timeStep.append(0)
+
     xduration = 0.1 / speed
     yduration = hatch / 125
 
@@ -711,6 +854,7 @@ def generateData(speed, hatch):
     prevtime = 0
 
     check = False
+
     for x in range(11):
         curSpeed = speed
 
@@ -749,22 +893,15 @@ def generateData(speed, hatch):
     yVel.append(0)
     xVel.append(0)
 
-    createXPos(speed)
-    createYPos(hatch)
 
-    print("Speed:", speed, "     ", "Hatch:", hatch)
-    print("Time             X         Y")
-    print("----------------------------------")
-    i = 0
-    while i < len(timeValues):
-        print(timeValues[i], "    ", xPos[i], "   ", yPos[i])
-        i = i + 1
+def createXPos(speed, initialPos, xArr):
+    arrFull = False
+    if len(timeStep) > 1:
+        arrFull = True
 
-
-def createXPos(speed):
     dt = 0.00002
-    prevPos = 0
-    xPos.append(prevPos)
+    prevPos = initialPos
+    xArr.append(prevPos)
 
     i = 0
 
@@ -775,19 +912,21 @@ def createXPos(speed):
             if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
                 dx = dt * xVel[i]
                 prevPos += dx
-                xPos.append(round(prevPos, 6))
+                xArr.append(round(prevPos, 6))
             else:
-                xPos.append(round(prevPos, 6))
+                xArr.append(round(prevPos, 6))
             curTimeStep += dt
-            timeStep.append(round(curTimeStep, 6))
+
+            if arrFull == False:
+                timeStep.append(curTimeStep)
         i = i + 1
 
 
-def createYPos():
+def createYPos(initialPos, yArr):
     dt = 0.00002
     speed = 125
-    prevPos = 0
-    yPos.append(prevPos)
+    prevPos = initialPos
+    yArr.append(prevPos)
 
     i = 0
 
@@ -798,12 +937,30 @@ def createYPos():
             if yVel[i] == speed and yVel[i + 1] == speed:
                 dy = dt * yVel[i]
                 prevPos += dy
-                yPos.append(round(prevPos, 6))
+                yArr.append(round(prevPos, 6))
             else:
-                yPos.append(round(prevPos, 6))
+                yArr.append(round(prevPos, 6))
             curTimeStep += dt
 
         i = i + 1
+
+
+def fillValues():
+    dt = 0.00002
+    prevTime = timeStep[len(timeStep) - 1]
+    camPrevXPos = camXPos[len(timeStep) - 1]
+    camPrevYPos = camYPos[len(timeStep) - 1]
+    clipPrevXPos = clipXPos[len(timeStep) - 1]
+    clipPrevYPos = clipYPos[len(timeStep) - 1]
+
+    if len(timeStep) != numSteps:
+        while len(timeStep) != numSteps + 1:
+            prevTime += dt
+            timeStep.append(prevTime)
+            camXPos.append(camPrevXPos)
+            camYPos.append(camPrevYPos)
+            clipXPos.append(clipPrevXPos)
+            clipYPos.append(clipPrevYPos)
 
 
 runProcessing()

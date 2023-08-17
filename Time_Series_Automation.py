@@ -3,9 +3,11 @@ import csv
 
 xVel = []
 yVel = []
-xPos = []
-yPos = []
-time = []
+camXPos = []
+camYPos = []
+clipXPos = []
+clipYPos = []
+timeValues = []
 timeStep = []
 numSteps = 355
 
@@ -26,7 +28,7 @@ def readCsv():
 
 
 def createData(speed, hatch):
-    time.append(0)
+    timeValues.append(0)
     timeStep.append(0)
 
     xduration = 0.1 / speed
@@ -47,75 +49,81 @@ def createData(speed, hatch):
             if check:
                 prevtime += 0.0000008
                 rounded_number = round(prevtime, 8)
-                time.append(rounded_number)
+                timeValues.append(rounded_number)
             xVel.append(curSpeed)
             yVel.append(0)
             prevtime += xduration
             xVel.append(curSpeed)
             yVel.append(0)
             rounded_number = round(prevtime, 8)
-            time.append(rounded_number)
+            timeValues.append(rounded_number)
             check = True
         else:
             prevtime += 0.0000008
             rounded_number = round(prevtime, 8)
-            time.append(rounded_number)
+            timeValues.append(rounded_number)
             yVel.append(125)
             xVel.append(0)
             prevtime += yduration
             yVel.append(125)
             xVel.append(0)
             rounded_number = round(prevtime, 8)
-            time.append(rounded_number)
+            timeValues.append(rounded_number)
 
         count += 1
     prevtime += 0.0000008
     rounded_number = round(prevtime, 8)
-    time.append(rounded_number)
+    timeValues.append(rounded_number)
     yVel.append(0)
     xVel.append(0)
 
 
-def createXPos(speed):
+def createXPos(speed, initialPos, xArr):
+    arrFull = False
+    if len(timeStep) > 1:
+        arrFull = True
+
     dt = 0.00002
-    prevPos = 0
-    xPos.append(prevPos)
+    prevPos = initialPos
+    xArr.append(prevPos)
 
     i = 0
 
     curTimeStep = 0
 
-    while i < len(time) - 1:
-        while time[i + 1] > curTimeStep:
+    while i < len(timeValues) - 1:
+        while timeValues[i + 1] > curTimeStep:
             if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
                 dx = dt * xVel[i]
                 prevPos += dx
-                xPos.append(round(prevPos, 6))
+                xArr.append(round(prevPos, 6))
             else:
-                xPos.append(round(prevPos, 6))
+                xArr.append(round(prevPos, 6))
             curTimeStep += dt
-            timeStep.append(curTimeStep)
+
+            if arrFull == False:
+                timeStep.append(curTimeStep)
         i = i + 1
 
 
-def createYPos():
+def createYPos(initialPos, yArr):
     dt = 0.00002
     speed = 125
-    prevPos = 0
-    yPos.append(prevPos)
+    prevPos = initialPos
+    yArr.append(prevPos)
 
     i = 0
 
     curTimeStep = timeStep[i]
 
-    while i < len(time) - 1:
-        while time[i + 1] > curTimeStep:
+    while i < len(timeValues) - 1:
+        while timeValues[i + 1] > curTimeStep:
             if yVel[i] == speed and yVel[i + 1] == speed:
                 dy = dt * yVel[i]
                 prevPos += dy
-                yPos.append(round(prevPos, 6))
+                yArr.append(round(prevPos, 6))
             else:
-                yPos.append(round(prevPos, 6))
+                yArr.append(round(prevPos, 6))
             curTimeStep += dt
 
         i = i + 1
@@ -124,22 +132,29 @@ def createYPos():
 def fillValues():
     dt = 0.00002
     prevTime = timeStep[len(timeStep) - 1]
-    prevXPos = xPos[len(timeStep) - 1]
-    prevYPos = yPos[len(timeStep) - 1]
+    camPrevXPos = camXPos[len(timeStep) - 1]
+    camPrevYPos = camYPos[len(timeStep) - 1]
+    clipPrevXPos = clipXPos[len(timeStep) - 1]
+    clipPrevYPos = clipYPos[len(timeStep) - 1]
 
     if len(timeStep) != numSteps:
         while len(timeStep) != numSteps + 1:
             prevTime += dt
             timeStep.append(prevTime)
-            xPos.append(prevXPos)
-            yPos.append(prevYPos)
+            camXPos.append(camPrevXPos)
+            camYPos.append(camPrevYPos)
+            clipXPos.append(clipPrevXPos)
+            clipYPos.append(clipPrevYPos)
 
 
 # readCsv()
 createData(100, 0.013)
-createXPos(100)
-createYPos()
+createXPos(100, 0.02, camXPos)
+createYPos(0.02, camYPos)
+createXPos(100, -0.015, clipXPos)
+createYPos(-0.015, clipYPos)
 fillValues()
+
 
 print("Speed:", 100, "     ", "Hatch:", 0.013)
 print("#       Time             X         Y")
@@ -148,5 +163,5 @@ i = 0
 while i < len(timeStep):
     time = timeStep[i]
     scientific_notation = format(time, ".2e")
-    print(i, "     ", scientific_notation, "        ", xPos[i], "   ", yPos[i])
+    print(i, "     ", scientific_notation, "        ", camXPos[i], "   ", camYPos[i])
     i = i + 1
