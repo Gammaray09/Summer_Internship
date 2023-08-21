@@ -5,6 +5,7 @@
 
 #### import the simple module from the paraview
 from paraview.simple import *
+import csv
 
 xVel = []
 yVel = []
@@ -13,7 +14,9 @@ camYPos = []
 clipXPos = []
 clipYPos = []
 timeValues = []
-timeStep = [0]
+timeStep = []
+power = []
+checkPower = []
 numSteps = 355
 
 
@@ -143,6 +146,8 @@ def runProcessing():
     # Create a new 'Render View'
     renderView1 = CreateView("RenderView")
     renderView1.AxesGrid = "GridAxes3DActor"
+    renderView1.OrientationAxesVisibility = 0
+    renderView1.AxesGrid.Visibility = 0
     renderView1.StereoType = "Crystal Eyes"
     renderView1.CameraFocalDisk = 1.0
     renderView1.CameraParallelProjection = 1
@@ -156,17 +161,6 @@ def runProcessing():
 
     # assign view to a particular cell in the layout
     AssignViewToLayout(view=renderView1, layout=case1flsgrf6pmelt400p1000130um, hint=0)
-
-    # create a new 'Annotate Time'
-    time = AnnotateTime(registrationName="Time")
-    time.Format = "Time: %0.3f"
-
-    # show data in view
-    timeDisplay = Show(time, renderView1, "TextSourceRepresentation")
-
-    # trace defaults for the display properties.
-    timeDisplay.WindowLocation = "Any Location"
-    timeDisplay.FontSize = 30
 
     # reset view to fit data
     renderView1.ResetCamera(False)
@@ -232,18 +226,6 @@ def runProcessing():
     hotspotsDisplay.ScalarOpacityUnitDistance = 0.03343245831802152
     hotspotsDisplay.OpacityArrayName = ["POINTS", "Magnitude"]
 
-    # create a new 'Logo'
-    fLOW3DLOGO = Logo(registrationName="FLOW-3D LOGO")
-
-    # a texture
-    fLOW3Dpng = CreateTexture("C:\\flow3d\\POST_2023R1\\/f3d/images/FLOW-3D.png")
-
-    # change texture
-    fLOW3DLOGO.Texture = fLOW3Dpng
-
-    # show data in view
-    fLOW3DLOGODisplay = Show(fLOW3DLOGO, renderView1, "LogoSourceRepresentation")
-
     # set active source
     SetActiveSource(flsgrf6pmelt400p1000130um)
 
@@ -251,13 +233,13 @@ def runProcessing():
     pressureLUT = GetColorTransferFunction("Pressure")
 
     # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-    pressureLUT.ApplyPreset("Cool to Warm", True)
+    pressureLUT.ApplyPreset("X Ray", True)
 
     # get color transfer function/color map for 'Temperature'
     temperatureLUT = GetColorTransferFunction("Temperature")
 
     # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-    temperatureLUT.ApplyPreset("Cool to Warm", True)
+    temperatureLUT.ApplyPreset("X Ray", True)
 
     # create a new 'FLSGRF IsoObject'
     fluid = FLSGRFIsoObject(registrationName="Fluid", Input=flsgrf6pmelt400p1000130um)
@@ -700,7 +682,6 @@ def runProcessing():
 
     # Properties modified on clip1
     clip1.ClipType = "Box"
-
     # Properties modified on clip1.ClipType
     clip1.ClipType.Length = [0.07, 0.07, 0.07]
 
@@ -760,8 +741,16 @@ def runProcessing():
     Hide(fluid, renderView1)
     Hide(hotspots, renderView1)
 
-    # show color bar/color legend
-    clip1Display.SetScalarBarVisibility(renderView1, True)
+    ColorBy(fluidDisplay, ("POINTS", "Temperature"))
+
+    # Hide the scalar bar for this color map if no visible data is colored by it.
+    HideScalarBarIfNotNeeded(temperatureLUT, renderView1)
+
+    # rescale color and/or opacity maps used to include current data range
+    fluidDisplay.RescaleTransferFunctionToDataRange(True, False)
+
+    # hide color bar/color legend
+    fluidDisplay.SetScalarBarVisibility(renderView1, False)
 
     # update the view to ensure updated data information
     renderView1.Update()
@@ -778,7 +767,10 @@ def runProcessing():
 
     print(numSteps)
 
-    createData(100, 0.013)
+    # createData(100, 0.013)
+
+    readCsv()
+    createPowerPos()
     createXPos(100, 0.02, camXPos)
     createYPos(0.02, camYPos)
     createXPos(100, -0.015, clipXPos)
@@ -795,27 +787,29 @@ def runProcessing():
         i = i + 1
 
     for i in range(len(timeStep)):
-        animationScene.AnimationTime = timeStep[i]
-        renderView1.Update()
+        if checkPower[i] == True:
+            animationScene.AnimationTime = timeStep[i]
+            renderView1.Update()
 
-        # Calculate new camera position, focal point, and view up based on the time value
-        new_camera_position = [camXPos[i], camXPos[i], 0.39297822260506643]
-        new_camera_focal_point = [camXPos[i], camYPos[i], 0.006651218282058835]
-        new_camera_view_up = [0, 1, 0]
-        new_clip_position = [clipXPos[i], clipYPos[i], -0.01]
+            # Calculate new camera position, focal point, and view up based on the time value
+            new_camera_position = [camXPos[i], camXPos[i], 0.39297822260506643]
+            new_camera_focal_point = [camXPos[i], camYPos[i], 0.006651218282058835]
+            new_camera_view_up = [0, 1, 0]
+            new_clip_position = [clipXPos[i], clipYPos[i], -0.01]
 
-        renderView1.CameraPosition = new_camera_position
-        renderView1.CameraFocalPoint = new_camera_focal_point
-        renderView1.CameraViewUp = new_camera_view_up
-        clip1.ClipType.Position = new_clip_position
-        renderView1.Update()
-        # save screenshot
+            renderView1.CameraPosition = new_camera_position
+            renderView1.CameraFocalPoint = new_camera_focal_point
+            renderView1.CameraViewUp = new_camera_view_up
+            clip1.ClipType.Position = new_clip_position
+            temperatureLUT.RescaleTransferFunction(300.0, 3000.0)
+            renderView1.Update()
+            # save screenshot
 
-        SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output/data{i}.png",
-            case1flsgrf6pmelt400p1000130um,
-            ImageResolution=[1391, 611],
-        )
+            SaveScreenshot(
+                f"C:/Users/Aashman Sharma/Documents/Paraview/output/data{i}.png",
+                case1flsgrf6pmelt400p1000130um,
+                ImageResolution=[1632, 1632],
+            )
 
     # ================================================================
     # addendum: following script captures some of the application
@@ -894,6 +888,28 @@ def createData(speed, hatch):
     xVel.append(0)
 
 
+def readCsv():
+    xCsv = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-x.csv"
+    yCsv = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-y.csv"
+    pCsv = (
+        r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-power.csv"
+    )
+
+    with open(xCsv, "r") as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            timeValues.append(float(row[0]))
+            xVel.append(float(row[1]))
+    with open(yCsv, "r") as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            yVel.append(float(row[1]))
+    with open(pCsv, "r") as csvfile:
+        csvreader = csv.reader(csvfile)
+        for row in csvreader:
+            power.append(float(row[1]))
+
+
 def createXPos(speed, initialPos, xArr):
     arrFull = False
     if len(timeStep) > 1:
@@ -945,6 +961,23 @@ def createYPos(initialPos, yArr):
         i = i + 1
 
 
+def createPowerPos():
+    dt = 0.00002
+    i = 0
+
+    curTimeStep = i
+
+    while i < len(timeValues) - 1:
+        while timeValues[i + 1] > curTimeStep:
+            if power[i] > 0:
+                checkPower.append(True)
+            else:
+                checkPower.append(False)
+            curTimeStep += dt
+
+        i = i + 1
+
+
 def fillValues():
     dt = 0.00002
     prevTime = timeStep[len(timeStep) - 1]
@@ -961,6 +994,7 @@ def fillValues():
             camYPos.append(camPrevYPos)
             clipXPos.append(clipPrevXPos)
             clipYPos.append(clipPrevYPos)
+            checkPower.append(True)
 
 
 runProcessing()
