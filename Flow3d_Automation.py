@@ -6,6 +6,7 @@
 #### import the simple module from the paraview
 from paraview.simple import *
 import csv
+import time
 
 xVel = []
 yVel = []
@@ -787,29 +788,28 @@ def runProcessing():
         i = i + 1
 
     for i in range(len(timeStep)):
-        if checkPower[i] == True:
-            animationScene.AnimationTime = timeStep[i]
-            renderView1.Update()
+        animationScene.AnimationTime = timeStep[i]
+        renderView1.Update()
 
-            # Calculate new camera position, focal point, and view up based on the time value
-            new_camera_position = [camXPos[i], camXPos[i], 0.39297822260506643]
-            new_camera_focal_point = [camXPos[i], camYPos[i], 0.006651218282058835]
-            new_camera_view_up = [0, 1, 0]
-            new_clip_position = [clipXPos[i], clipYPos[i], -0.01]
+        # Calculate new camera position, focal point, and view up based on the time value
+        new_camera_position = [camXPos[i], camXPos[i], 0.39297822260506643]
+        new_camera_focal_point = [camXPos[i], camYPos[i], 0.006651218282058835]
+        new_camera_view_up = [0, 1, 0]
+        new_clip_position = [clipXPos[i], clipYPos[i], -0.01]
 
-            renderView1.CameraPosition = new_camera_position
-            renderView1.CameraFocalPoint = new_camera_focal_point
-            renderView1.CameraViewUp = new_camera_view_up
-            clip1.ClipType.Position = new_clip_position
-            temperatureLUT.RescaleTransferFunction(300.0, 3000.0)
-            renderView1.Update()
-            # save screenshot
-
-            SaveScreenshot(
-                f"C:/Users/Aashman Sharma/Documents/Paraview/output/data{i}.png",
-                case1flsgrf6pmelt400p1000130um,
-                ImageResolution=[1632, 1632],
-            )
+        renderView1.CameraPosition = new_camera_position
+        renderView1.CameraFocalPoint = new_camera_focal_point
+        renderView1.CameraViewUp = new_camera_view_up
+        clip1.ClipType.Position = new_clip_position
+        temperatureLUT.RescaleTransferFunction(300.0, 3000.0)
+        renderView1.Update()
+        # save screenshot
+        scientific_notation = format(timeStep[i], ".2e")
+        SaveScreenshot(
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output/img{i}_{scientific_notation}_{clipXPos[i]}_{clipYPos[i]}.png",
+            case1flsgrf6pmelt400p1000130um,
+            ImageResolution=[1632, 1632],
+        )
 
     # ================================================================
     # addendum: following script captures some of the application
@@ -997,4 +997,7 @@ def fillValues():
             checkPower.append(True)
 
 
+startTime = time.perf_counter()
 runProcessing()
+finalTime = time.perf_counter()
+print(finalTime - startTime)

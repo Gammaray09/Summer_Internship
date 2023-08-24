@@ -179,7 +179,7 @@ def fillValues():
 
 readCsv()
 # createData(100, 0.013)
-# createPowerPos()
+createPowerPos()
 createXPos(100, 0.02, camXPos)
 createYPos(0.02, camYPos)
 createXPos(100, -0.015, clipXPos)
