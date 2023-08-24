@@ -783,9 +783,10 @@ def runProcessing():
     # Leave commented if readCsv() is being called
     # createData(100, 0.013)
 
-    #Callling all methods to set up trajectory data
+    # Calling all methods to set up trajectory data
+    # The CreateXPos function must be called before the createYPos function for both camera and clip
     readCsv()
-    createPowerPos()
+    createPowerBoolean()
     createXPos(100, 0.02, camXPos)
     createYPos(0.02, camYPos)
     createXPos(100, -0.015, clipXPos)
@@ -944,6 +945,9 @@ def createXPos(speed, initialPos, xArr):
 
     curTimeStep = 0
 
+    # This loop goes through each time values in the timeValues array and continusly adds time steps into
+    # the timeStep array until the current timestep is greater than the next time value. If the timsteps are
+    # during when the laser in on, the dx will be added to the previous position and then added to the xArr.
     while i < len(timeValues) - 1:
         while timeValues[i + 1] > curTimeStep:
             if abs(xVel[i]) == speed and abs(xVel[i + 1]) == speed:
@@ -960,7 +964,7 @@ def createXPos(speed, initialPos, xArr):
 
 
 # This function generates the y position values for every timestep
-# This funtion uses the yVel array to determine when the laser is moving and how long it is moving for
+# This function uses the yVel array to determine when the laser is moving and how long it is moving for
 # Since this function is used for generating positions for both camera and clip, this function takes in the 
 # the intitial position as initialPos and the array for the positions to be stored in ar yArr
 def createYPos(initialPos, yArr):
@@ -973,6 +977,7 @@ def createYPos(initialPos, yArr):
 
     curTimeStep = timeStep[i]
 
+    # This loop works similiarly to the createXPos function but only creates a yPos for every timeStep
     while i < len(timeValues) - 1:
         while timeValues[i + 1] > curTimeStep:
             if yVel[i] == speed and yVel[i + 1] == speed:
@@ -985,8 +990,9 @@ def createYPos(initialPos, yArr):
 
         i = i + 1
 
-
-def createPowerPos():
+# This function uses the power array to add a True or False boolean for every timestep
+# depending on if the laser is turned on or not
+def createPowerBoolean():
     dt = 0.00002
     i = 0
 
@@ -1002,7 +1008,9 @@ def createPowerPos():
 
         i = i + 1
 
-
+# This function fills in the final position values for each timestep that doesn't have a relative
+# position and power function yet
+# The position remains the same as it was when the laser stopped moving and the power remains True
 def fillValues():
     dt = 0.00002
     prevTime = timeStep[len(timeStep) - 1]
@@ -1021,7 +1029,7 @@ def fillValues():
             clipYPos.append(clipPrevYPos)
             checkPower.append(True)
 
-
+# Runs the whole code and prints out runtime
 startTime = time.perf_counter()
 runProcessing()
 finalTime = time.perf_counter()
