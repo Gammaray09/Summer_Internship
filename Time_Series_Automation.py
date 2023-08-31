@@ -199,9 +199,9 @@ while i < len(timeStep):
         "     ",
         scientific_notation,
         "        ",
-        camXPos[i],
+        clipXPos[i],
         "   ",
-        camYPos[i],
+        clipYPos[i],
         "      ",
     )
     i = i + 1
