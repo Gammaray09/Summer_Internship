@@ -160,7 +160,8 @@ def createPowerPos():
 
 def fillValues():
     dt = 0.00002
-    prevTime = timeStep[len(timeStep) - 1]
+    prevTime = timeStep[len(timeStep) - 2]
+    print("hello", prevTime)
     camPrevXPos = camXPos[len(timeStep) - 1]
     camPrevYPos = camYPos[len(timeStep) - 1]
     clipPrevXPos = clipXPos[len(timeStep) - 1]
@@ -185,10 +186,15 @@ createYPos(0.02, camYPos)
 createXPos(100, -0.015, clipXPos)
 createYPos(-0.015, clipYPos)
 fillValues()
+timeStep.insert(0, 0)
+clipXPos.insert(0, -0.015)
+clipYPos.insert(0, -0.015)
+camXPos.insert(0, 0.02)
+camYPos.insert(0, 0.02)
 
 
 print("Speed:", 100, "     ", "Hatch:", 0.013)
-print("#       Time             X         Y")
+print("#       Time             Xcam        Ycam        Xclip        YClip")
 print("-------------------------------------")
 i = 0
 while i < len(timeStep):
@@ -199,9 +205,10 @@ while i < len(timeStep):
         "     ",
         scientific_notation,
         "        ",
-        clipXPos[i],
+        camXPos[i],
         "   ",
-        clipYPos[i],
+        camYPos[i],
         "      ",
+        clipXPos[i],
     )
     i = i + 1

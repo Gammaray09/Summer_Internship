@@ -659,8 +659,127 @@ def runProcessing():
     # invert the transfer function
     temperatureLUT.InvertTransferFunction()
 
+    # set active source
+    SetActiveSource(flsgrf6pmelt400p1000130um)
+
+    # create a new 'FLSGRF Isosurfaces'
+    fLSGRFIsosurfaces1 = FLSGRFIsosurfaces(
+        registrationName="FLSGRFIsosurfaces1", Input=flsgrf6pmelt400p1000130um
+    )
+    fLSGRFIsosurfaces1.Surface = ["", "", "", "", ""]
+    fLSGRFIsosurfaces1.Box = "Box"
+    fLSGRFIsosurfaces1.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
+    ]
+
+    # init the 'Box' selected for 'Box'
+    fLSGRFIsosurfaces1.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    fLSGRFIsosurfaces1.Box.Length = [
+        0.14225888310465962,
+        0.14221314317546785,
+        0.028215383179485798,
+    ]
+
+    # Properties modified on fLSGRFIsosurfaces1
+    fLSGRFIsosurfaces1.Surface = ["", "", "", "", "Fraction Of Fluid"]
+
+    # Properties modified on fLSGRFIsosurfaces1.Box
+    fLSGRFIsosurfaces1.Box.UseReferenceBounds = 1
+    fLSGRFIsosurfaces1.Box.Bounds = [
+        -0.0010720646241679788,
+        0.14118681848049164,
+        -0.0011556369718164206,
+        0.14105750620365143,
+        -0.007207692600786686,
+        0.021007690578699112,
+    ]
+    fLSGRFIsosurfaces1.Box.Position = [0.0, 0.0, 0.0]
+    fLSGRFIsosurfaces1.Box.Length = [1.0, 1.0, 1.0]
+
+    # show data in view
+    fLSGRFIsosurfaces1Display = Show(
+        fLSGRFIsosurfaces1, renderView1, "GeometryRepresentation"
+    )
+
+    # trace defaults for the display properties.
+    fLSGRFIsosurfaces1Display.Representation = "Surface"
+    fLSGRFIsosurfaces1Display.ColorArrayName = [None, ""]
+    fLSGRFIsosurfaces1Display.SelectTCoordArray = "None"
+    fLSGRFIsosurfaces1Display.SelectNormalArray = "Normals"
+    fLSGRFIsosurfaces1Display.SelectTangentArray = "None"
+    fLSGRFIsosurfaces1Display.OSPRayScaleArray = "Cell Type"
+    fLSGRFIsosurfaces1Display.OSPRayScaleFunction = "PiecewiseFunction"
+    fLSGRFIsosurfaces1Display.SelectOrientationVectors = "None"
+    fLSGRFIsosurfaces1Display.ScaleFactor = 0.014025523991585943
+    fLSGRFIsosurfaces1Display.SelectScaleArray = "Cell Type"
+    fLSGRFIsosurfaces1Display.GlyphType = "Arrow"
+    fLSGRFIsosurfaces1Display.GlyphTableIndexArray = "Cell Type"
+    fLSGRFIsosurfaces1Display.GaussianRadius = 0.0007012761995792971
+    fLSGRFIsosurfaces1Display.SetScaleArray = ["POINTS", "Cell Type"]
+    fLSGRFIsosurfaces1Display.ScaleTransferFunction = "PiecewiseFunction"
+    fLSGRFIsosurfaces1Display.OpacityArray = ["POINTS", "Cell Type"]
+    fLSGRFIsosurfaces1Display.OpacityTransferFunction = "PiecewiseFunction"
+    fLSGRFIsosurfaces1Display.DataAxesGrid = "GridAxesRepresentation"
+    fLSGRFIsosurfaces1Display.PolarAxes = "PolarAxesRepresentation"
+
+    # update the view to ensure updated data information
+    renderView1.Update()
+
+    # set scalar coloring
+    ColorBy(fLSGRFIsosurfaces1Display, ("POINTS", "Cell Type"))
+
+    # rescale color and/or opacity maps used to include current data range
+    fLSGRFIsosurfaces1Display.RescaleTransferFunctionToDataRange(True, False)
+
+    # show color bar/color legend
+    fLSGRFIsosurfaces1Display.SetScalarBarVisibility(renderView1, True)
+
+    # get color transfer function/color map for 'CellType'
+    cellTypeLUT = GetColorTransferFunction("CellType")
+    cellTypeLUT.ScalarRangeInitialized = 1.0
+
+    # get opacity transfer function/opacity map for 'CellType'
+    cellTypePWF = GetOpacityTransferFunction("CellType")
+    cellTypePWF.ScalarRangeInitialized = 1
+
     # create a new 'Clip'
-    clip1 = Clip(registrationName="Clip1", Input=fluid)
+    clip1 = Clip(registrationName="Clip1", Input=fLSGRFIsosurfaces1)
     clip1.ClipType = "Plane"
     clip1.HyperTreeGridClipper = "Plane"
     clip1.Scalars = ["POINTS", "Pressure"]
@@ -747,6 +866,7 @@ def runProcessing():
 
     # hides fluid and hotspot data
     Hide(fluid, renderView1)
+    Hide(fLSGRFIsosurfaces1, renderView1)
     Hide(hotspots, renderView1)
 
     ColorBy(fluidDisplay, ("POINTS", "Temperature"))
@@ -788,6 +908,11 @@ def runProcessing():
     createXPos(100, -0.015, clipXPos)
     createYPos(-0.015, clipYPos)
     fillValues()
+    timeStep.insert(0, 0)
+    clipXPos.insert(0, -0.015)
+    clipYPos.insert(0, -0.015)
+    camXPos.insert(0, 0.02)
+    camYPos.insert(0, 0.02)
 
     # Prints all time and trajectory values in terminal
     i = 0
@@ -808,6 +933,7 @@ def runProcessing():
         renderView1.Update()
 
         # Gets corresponding postion value based on timestep index
+        fLSGRFIsosurfaces1.IsoValue = 0.5
         new_camera_position = [camXPos[i], camYPos[i], 0.187741]
         new_camera_focal_point = [camXPos[i], camYPos[i], 0.013921]
         new_camera_view_up = [0, 1, 0]
@@ -828,7 +954,7 @@ def runProcessing():
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output/img{i}_{scientific_notation}_{clipXPos[i]}_{clipYPos[i]}.png",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output/snap_{i}.png",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
             OverrideColorPalette="BlackBackground",
