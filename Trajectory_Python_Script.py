@@ -3,9 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
+tstep = []
 
 def ReadLaserTrajectory(loc, s, h):
-    P0 = 400
+    P0 = 350
     locF = loc + "\\"
     fnameP = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-power.csv"
     fnamex = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-x.csv"
@@ -56,15 +57,15 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
 
     datTraj = {"t": t, "x": x, "y": y, "vx": vx, "vy": vy, "p": p, "pOn": pOn}
 
-    print(y)
+    print(t[5])
 
     return datTraj
 
 
-loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
+loc = r"C:\Users\aashm\Documents\Paraview\Time_Series"
 Nt = 356
-x0 = 0
-y0 = 0
+x0 = 0.02
+y0 = 0.02
 t0 = 0
 dt = 2e-5
 s = 1000
@@ -72,22 +73,29 @@ h = 130
 
 dat = ReadLaserTrajectory(loc, s, h)
 datTraj = GetLaserTrajectory(dat, x0, y0, t0, dt, Nt)
+tstep = datTraj.get("t")
+for x in tstep:
+    print(x)
 
-# plt.figure(figsize=(10, 6))
+plt.figure(figsize=(10, 6))
 
-# Plot t vs x
-# plt.plot(datTraj["t"], datTraj["x"], label="x(t)", color="blue")
+endTimes =[0.0,0.001,0.0010008,0.0011048,0.0011056,0.0021056,0.0021064,0.0022104,0.0022112,0.0032112,0.003212,0.003316,0.0033168,0.0043168,0.0043176,0.0044216,0.0044224,0.0054224,0.0054232,0.0055272,0.005528,0.006528,0.0065288]
+camXEndPoints= [0.02,0.12,0.1201,0.1201,0.1201,0.0201,0.02,0.02,0.02,0.12,0.1201,0.1201,0.1201,0.0201,0.02,0.02,0.02,0.12,0.1201,0.1201,0.1201,0.0201,0.02]
+camYEndPoints =[0.02,0.02,0.02,0.033,0.0331,0.0331,0.0331,0.0461,0.0462,0.0462,0.0462,0.0592,0.0593,0.0593,0.0593,0.0723,0.0724,0.0724,0.0724,0.0854,0.0855,0.0855,0.0855]
 
-# Plot t vs y
-# plt.plot(datTraj["t"], datTraj["y"], label="y(t)", color="red")
+
+# Plot x vs y
+plt.plot(datTraj["x"], datTraj["y"],color="blue")
+plt.plot(camXEndPoints, camYEndPoints,"o", markersize = 2, label='Data Points')
+
 
 # Add labels, title, and legend
-# plt.xlabel("Time (t)")
-# plt.ylabel("Position")
-# plt.title("Position vs Time")
-# plt.legend()
+plt.xlabel("Y Pos")
+plt.ylabel("X Pos")
+plt.title("X Pos vs Y Pos")
+plt.legend()
 
 # Display the plot
-# plt.grid(True)
-# plt.tight_layout()
-# plt.show()
+plt.grid(True)
+plt.tight_layout()
+plt.show()

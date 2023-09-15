@@ -1,5 +1,5 @@
-import numpy
 import csv
+import matplotlib.pyplot as plt
 
 xVel = []
 yVel = []
@@ -15,10 +15,10 @@ numSteps = 355
 
 
 def readCsv():
-    xCsv = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-x.csv"
-    yCsv = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-y.csv"
+    xCsv = r"C:\Users\aashm\Documents\Paraview\Time_Series\350_1000_130-x.csv"
+    yCsv = r"C:\Users\aashm\Documents\Paraview\Time_Series\350_1000_130-y.csv"
     pCsv = (
-        r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series\400_1000_130-power.csv"
+        r"C:\Users\aashm\Documents\Paraview\Time_Series\350_1000_130-power.csv"
     )
 
     with open(xCsv, "r") as csvfile:
@@ -35,8 +35,7 @@ def readCsv():
         for row in csvreader:
             power.append(float(row[1]))
 
-    for x in power:
-        print(x)
+  
 
 
 def createData(speed, hatch):
@@ -129,15 +128,19 @@ def createYPos(initialPos, yArr):
     curTimeStep = timeStep[i]
 
     while i < len(timeValues) - 1:
+        intialPos = prevPos
         while timeValues[i + 1] > curTimeStep:
             if yVel[i] == speed and yVel[i + 1] == speed:
+                print(prevPos-initialPos)
                 dy = dt * yVel[i]
                 prevPos += dy
+                yArr.append(round(prevPos, 6))
+            elif yVel[i] == speed and yVel[i + 1] == 0:
+                prevPos += 0.0001
                 yArr.append(round(prevPos, 6))
             else:
                 yArr.append(round(prevPos, 6))
             curTimeStep += dt
-
         i = i + 1
 
 
@@ -161,14 +164,13 @@ def createPowerPos():
 def fillValues():
     dt = 0.00002
     prevTime = timeStep[len(timeStep) - 2]
-    print("hello", prevTime)
     camPrevXPos = camXPos[len(timeStep) - 1]
     camPrevYPos = camYPos[len(timeStep) - 1]
     clipPrevXPos = clipXPos[len(timeStep) - 1]
     clipPrevYPos = clipYPos[len(timeStep) - 1]
 
     if len(timeStep) != numSteps:
-        while len(timeStep) != numSteps + 1:
+        while len(timeStep) != numSteps:
             prevTime += dt
             timeStep.append(prevTime)
             camXPos.append(camPrevXPos)
@@ -178,8 +180,9 @@ def fillValues():
             checkPower.append(True)
 
 
+
 readCsv()
-# createData(100, 0.013)
+#createData(100, 0.013)
 createPowerPos()
 createXPos(100, 0.02, camXPos)
 createYPos(0.02, camYPos)
@@ -197,18 +200,43 @@ print("Speed:", 100, "     ", "Hatch:", 0.013)
 print("#       Time             Xcam        Ycam        Xclip        YClip")
 print("-------------------------------------")
 i = 0
+
 while i < len(timeStep):
     time = timeStep[i]
     scientific_notation = format(time, ".2e")
-    print(
-        i,
-        "     ",
-        scientific_notation,
-        "        ",
-        camXPos[i],
-        "   ",
-        camYPos[i],
-        "      ",
-        clipXPos[i],
-    )
+    timeStep[i]=scientific_notation
+    
     i = i + 1
+
+print(timeStep)
+
+
+def remove_last_two_elements(input_array):
+    # Check if the input_array has at least two elements
+    if len(input_array) >= 2:
+        # Use slicing to remove the last two elements and create a new list
+        result_array = input_array[:-1]
+        return result_array
+    else:
+        # If the input_array has less than two elements, return an empty list
+        return []
+
+
+endTimes =[0.0,0.001,0.0010008,0.0011048,0.0011056,0.0021056,0.0021064,0.0022104,0.0022112,0.0032112,0.003212,0.003316,0.0033168,0.0043168,0.0043176,0.0044216,0.0044224,0.0054224,0.0054232,0.0055272,0.005528,0.006528,0.0065288]
+camXEndPoints= [0.02,0.12,0.1201,0.1201,0.1201,0.0201,0.02,0.02,0.02,0.12,0.1201,0.1201,0.1201,0.0201,0.02,0.02,0.02,0.12,0.1201,0.1201,0.1201,0.0201,0.02]
+camYEndPoints =[0.02,0.02,0.02,0.033,0.0331,0.0331,0.0331,0.0461,0.0462,0.0462,0.0462,0.0592,0.0593,0.0593,0.0593,0.0723,0.0724,0.0724,0.0724,0.0854,0.0855,0.0855,0.0855]
+
+fig, axs = plt.subplots(1, 2)
+
+axs[0].plot(remove_last_two_elements(clipXPos), clipYPos)
+axs[0].set_title('Line Plot of X and Y Clip')
+
+axs[1].plot(camXEndPoints, camYEndPoints,'o', markersize=1, label='Data Points')
+
+axs[1].plot(remove_last_two_elements(camXPos), camYPos)
+axs[1].set_title('Line Plot of X and Y Cam')
+
+
+plt.grid(True)  # Add gridlines (optional)
+plt.tight_layout()
+plt.show()
