@@ -2,19 +2,6 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
-import csv
-
-xVel = []
-yVel = []
-camXPos = []
-camYPos = []
-clipXPos = []
-clipYPos = []
-timeValues = []
-timeStep = []
-power = []
-checkPower = []
-numSteps = 355
 
 
 def ReadLaserTrajectory(loc, s, h):
@@ -24,28 +11,16 @@ def ReadLaserTrajectory(loc, s, h):
     fnamex = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-x.csv"
     fnamey = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-y.csv"
 
-    def read_csv_as_float(filename):
-        with open(filename, "r") as f:
-            reader = csv.reader(f)
-            data = np.array([list(map(float, row)) for row in reader])
-        return data
+    Fp = pd.read_csv(fnameP, header=None).values
+    Fx = pd.read_csv(fnamex, header=None).values
+    Fy = pd.read_csv(fnamey, header=None).values
 
-    Fp = read_csv_as_float(fnameP)
-    Fx = read_csv_as_float(fnamex)
-    Fy = read_csv_as_float(fnamey)
-
-    # Read data from the second column of the first CSV file
-    Ft = Fx[:, 0]
-    Fp = Fp[:, 1]
-    Fx = Fx[:, 1]
-    Fy = Fy[:, 1]
-
-    dat = np.column_stack((Ft, Fx, Fy, Fp))
+    dat = np.column_stack((Fx, Fy[:, 1], Fp[:, 1]))
 
     return dat
 
 
-def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
+def GetLaserTrajectoryMod(dat, x0, y0, t0, dt, Nt):
     t = t0 + dt * np.linspace(0, Nt - 1, Nt)
     p = np.zeros(Nt)
     x = np.zeros(Nt)
@@ -104,38 +79,27 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
 
 loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
 Nt = 356
-xCam = -0.015
-yCam = -0.015
-xClip = 0.02
-yClip = 0.02
+x0 = 0
+y0 = 0
 t0 = 0
 dt = 2e-5
 s = 1000
 h = 130
+
 dat = ReadLaserTrajectory(loc, s, h)
-datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt)
-datTrajClip = GetLaserTrajectory(dat, xClip, yClip, t0, dt, Nt)
-
-timeStep = datTrajCam.get("t")
-camXPos = datTrajCam.get("x")
-camYPos = datTrajCam.get("y")
-clipXPos = datTrajClip.get("x")
-clipYPos = datTrajClip.get("y")
-
-i = 0
-while i < len(timeStep):
-    time = timeStep[i]
-    print(i, "     ", time, "        ", camXPos[i], "   ", camYPos[i])
-    i = i + 1
-
-
+print(dat)
 """
+datTrajMod = GetLaserTrajectoryMod(dat, x0, y0, t0, dt, Nt)
+
 plt.figure(figsize=(10, 6))
 
 
-# Plot t vs x Mod
-plt.plot(datTrajMod["x"], datTrajMod["y"], label="x(t)", color="blue")
 
+# Plot t vs x Mod
+plt.plot(datTrajMod["t"], datTrajMod["x"], label="x(t)", color="blue")
+
+# Plot t vs y Mod
+plt.plot(datTrajMod["t"], datTrajMod["y"], label="y(t)", color="red")
 
 # Add labels, title, and legend
 plt.xlabel("Time (t)")

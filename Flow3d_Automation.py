@@ -9,18 +9,11 @@ import csv
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-
 
 # Arrays for storing trajectory data
 xVel = []
 yVel = []
-camXPos = []
-camYPos = []
-clipXPos = []
-clipYPos = []
 timeValues = []
-timeStep = []
 power = []
 checkPower = []
 numSteps = 355
@@ -900,10 +893,18 @@ def runProcessing():
     numSteps = animationScene.EndTime + 1
 
     # Runs Aashman's trajectory functions
-    runData()
+    # runData()
+    camXPos = []
+    camYPos = []
+    clipXPos = []
+    clipYPos = []
+    timeStep = []
 
-    # Runs Aashman's trajectory functions
-    #runTraj()
+    print(clipXPos)
+    print(clipYPos)
+
+    # Runs Anant's trajectory functions
+    timeStep, camXPos, camYPos, clipXPos, clipYPos = runTraj()
 
     # Prints all time and trajectory values in terminal
     i = 0
@@ -918,6 +919,7 @@ def runProcessing():
     # This loop iterates through every timestep in the timestep arr and set camera/clip position with
     # corresponding index in cameraPos and clipPos arrays. After camera/clip are at correct position a
     # screenshot is taken and saved to a specific folder
+
     for i in range(len(timeStep)):
         # Sets animation to current timestep
         animationScene.AnimationTime = timeStep[i]
@@ -945,7 +947,7 @@ def runProcessing():
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output/snap_{i}.png",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output_box/snap_{i}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
             OverrideColorPalette="BlackBackground",
@@ -957,7 +959,8 @@ def runProcessing():
     renderView1.CameraParallelScale = 0.03545
     renderView1.CameraParallelProjection = 1
 
-#---------------------------------------Aashman's Function------------------------------------------------------
+
+# ---------------------------------------Aashman's Function------------------------------------------------------
 # This function generates the velcity and time data if csv files are not avalible
 # Takes in a speed and hatch value that will be used to calculate critcial time points
 def createData(speed, hatch):
@@ -1166,25 +1169,42 @@ def runData():
     clipYPos.insert(0, -0.015)
     camXPos.insert(0, 0.02)
     camYPos.insert(0, 0.02)
-#--------------------------------------------------------------------------------------------------------------
 
 
+# --------------------------------------------------------------------------------------------------------------
 
-#-----------------------------------------------Anant's Functions----------------------------------------------
+
+# -----------------------------------------------Anant's Functions----------------------------------------------
+
+
 def ReadLaserTrajectory(loc, s, h):
-    P0 = 400
+    print("runTraj")
+    P0 = 350
     locF = loc + "\\"
     fnameP = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-power.csv"
     fnamex = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-x.csv"
     fnamey = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-y.csv"
 
-    Fp = pd.read_csv(fnameP, header=None).values
-    Fx = pd.read_csv(fnamex, header=None).values
-    Fy = pd.read_csv(fnamey, header=None).values
+    def read_csv_as_float(filename):
+        with open(filename, "r") as f:
+            reader = csv.reader(f)
+            data = np.array([list(map(float, row)) for row in reader])
+        return data
 
-    dat = np.column_stack((Fx, Fy[:, 1], Fp[:, 1]))
+    Fp = read_csv_as_float(fnameP)
+    Fx = read_csv_as_float(fnamex)
+    Fy = read_csv_as_float(fnamey)
+
+    # Read data from the second column of the first CSV file
+    Ft = Fx[:, 0]
+    Fp = Fp[:, 1]
+    Fx = Fx[:, 1]
+    Fy = Fy[:, 1]
+
+    dat = np.column_stack((Ft, Fx, Fy, Fp))
 
     return dat
+
 
 def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
     t = t0 + dt * np.linspace(0, Nt - 1, Nt)
@@ -1200,40 +1220,56 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
     pLim = dat[:, 3]
 
     Nlim = dat.shape[0]
-    for i0 in range(Nt - 1):
-        i = i0 + 1
-        for j in range(Nlim - 1):
-            if t[i] >= tLim[j] and t[i] < tLim[j + 1]:
-                tFac = (t[i] - tLim[j]) / (tLim[j + 1] - tLim[j])
-                p[i] = pLim[j] + tFac * (pLim[j + 1] - pLim[j])
-                vx[i] = vxLim[j] + tFac * (vxLim[j + 1] - vxLim[j])
-                vy[i] = vyLim[j] + tFac * (vyLim[j + 1] - vyLim[j])
-                break
+    dtLim = np.diff(tLim)
+    dtm = np.min(dtLim)
+    tM = np.max(t)
+    NtL = int(np.ceil(tM / dtm))
+    tL = t0 + dtm * np.linspace(0, NtL - 1, NtL)
 
-    x[0] = x0
-    y[0] = y0
-    for i in range(1, Nt):
-        # x[i] = x[i-1] + 0.5*dt*(vx[i-1] + vx[i])
-        # y[i] = y[i-1] + 0.5*dt*(vy[i-1] + vy[i])
-        x[i] = x[i - 1] + dt * vx[i - 1]
-        y[i] = y[i - 1] + dt * vy[i - 1]
+    pL = np.zeros(NtL)
+    xL = np.zeros(NtL)
+    yL = np.zeros(NtL)
+    vxL = np.zeros(NtL)
+    vyL = np.zeros(NtL)
+
+    for i in range(1, NtL):
+        for j in range(Nlim - 1):
+            if tL[i] < tLim[0]:
+                pL[i], vxL[i], vyL[i] = pLim[0], vxLim[0], vyLim[0]
+                break
+            elif tL[i] >= tLim[j] and tL[i] < tLim[j + 1]:
+                # Commented out the interpolation code as it's commented in the original MATLAB code
+                # tFac = (tL[i] - tLim[j]) / (tLim[j+1] - tLim[j])
+                pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
+                break
+            elif tL[i] >= tLim[Nlim - 1]:
+                pL[i], vxL[i], vyL[i] = pLim[Nlim - 1], vxLim[Nlim - 1], vyLim[Nlim - 1]
+
+    xL[0], yL[0] = x0, y0
+    for i in range(1, NtL):
+        xL[i] = xL[i - 1] + dtm * vxL[i - 1]
+        yL[i] = yL[i - 1] + dtm * vyL[i - 1]
+
+    p = np.interp(t, tL, pL)
+    vx = np.interp(t, tL, vxL)
+    vy = np.interp(t, tL, vyL)
+    x = np.interp(t, tL, xL)
+    y = np.interp(t, tL, yL)
 
     pOn = p != 0
 
     datTraj = {"t": t, "x": x, "y": y, "vx": vx, "vy": vy, "p": p, "pOn": pOn}
 
-    print(t)
-
     return datTraj
 
 
 def runTraj():
-    loc = r"C:\Users\aashm\Documents\Paraview\Time_Series"
+    loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
     Nt = 356
     xCam = 0.02
     yCam = 0.02
-    xClip = 0.02
-    yClip = 0.02
+    xClip = -0.015
+    yClip = -0.015
     t0 = 0
     dt = 2e-5
     s = 1000
@@ -1242,12 +1278,16 @@ def runTraj():
     datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt)
     datTrajClip = GetLaserTrajectory(dat, xClip, yClip, t0, dt, Nt)
 
-    timeStep= datTrajCam.get("t")
+    timeStep = datTrajCam.get("t")
     camXPos = datTrajCam.get("x")
     camYPos = datTrajCam.get("y")
     clipXPos = datTrajClip.get("x")
     clipYPos = datTrajClip.get("y")
-#--------------------------------------------------------------------------------------------------------------
+
+    return timeStep, camXPos, camYPos, clipXPos, clipYPos
+
+
+# --------------------------------------------------------------------------------------------------------------
 
 # Runs the whole code and prints out runtime
 startTime = time.perf_counter()
