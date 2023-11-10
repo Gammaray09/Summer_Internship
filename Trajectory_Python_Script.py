@@ -78,16 +78,22 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
                 break
             elif tL[i] >= tLim[j] and tL[i] < tLim[j + 1]:
                 # Commented out the interpolation code as it's commented in the original MATLAB code
-                # tFac = (tL[i] - tLim[j]) / (tLim[j+1] - tLim[j])
-                pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
+                # pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
+                tFac = (tL[i] - tLim[j]) / (tLim[j + 1] - tLim[j])
+                pL[i] = pLim[j] + tFac * (pLim[j + 1] - pLim[j])
+                vxL[i] = vxLim[j] + tFac * (vxLim[j + 1] - vxLim[j])
+                vyL[i] = vyLim[j] + tFac * (vyLim[j + 1] - vyLim[j])
                 break
             elif tL[i] >= tLim[Nlim - 1]:
                 pL[i], vxL[i], vyL[i] = pLim[Nlim - 1], vxLim[Nlim - 1], vyLim[Nlim - 1]
 
     xL[0], yL[0] = x0, y0
     for i in range(1, NtL):
-        xL[i] = xL[i - 1] + dtm * vxL[i - 1]
-        yL[i] = yL[i - 1] + dtm * vyL[i - 1]
+        xL[i] = xL[i - 1] + 0.5 * dtm * (vxL[i - 1] + vxL[i])
+        yL[i] = yL[i - 1] + 0.5 * dtm * (vyL[i - 1] + vyL[i])
+
+        # xL[i] = xL[i-1] + dtm * vxL[i-1]
+        # yL[i] = yL[i-1] + dtm * vyL[i-1]
 
     p = np.interp(t, tL, pL)
     vx = np.interp(t, tL, vxL)

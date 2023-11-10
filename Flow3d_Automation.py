@@ -947,7 +947,7 @@ def runProcessing():
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output_box/snap_{i}.tiff",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/cmos/snap_{i}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
             OverrideColorPalette="BlackBackground",
@@ -1179,7 +1179,7 @@ def runData():
 
 def ReadLaserTrajectory(loc, s, h):
     print("runTraj")
-    P0 = 350
+    P0 = 400
     locF = loc + "\\"
     fnameP = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-power.csv"
     fnamex = locF + str(P0) + "_" + str(s) + "_" + str(h) + "-x.csv"
@@ -1206,25 +1206,29 @@ def ReadLaserTrajectory(loc, s, h):
     return dat
 
 
-def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
+def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt, ap):
+    nFac = 10
+    ap1, ap2 = ap
     t = t0 + dt * np.linspace(0, Nt - 1, Nt)
+
     p = np.zeros(Nt)
     x = np.zeros(Nt)
     y = np.zeros(Nt)
     vx = np.zeros(Nt)
     vy = np.zeros(Nt)
 
-    tLim = dat[:, 0]
-    vxLim = dat[:, 1]
-    vyLim = dat[:, 2]
-    pLim = dat[:, 3]
+    tLim, vxLim, vyLim, pLim = dat.T
 
-    Nlim = dat.shape[0]
+    Nlim = len(dat)
     dtLim = np.diff(tLim)
-    dtm = np.min(dtLim)
+    dtm = np.min(dtLim) / nFac
     tM = np.max(t)
-    NtL = int(np.ceil(tM / dtm))
+    NtL = int(np.ceil(tM / dtm)) + 1
+
     tL = t0 + dtm * np.linspace(0, NtL - 1, NtL)
+
+    # print(max(tL))
+    # print(max(t))
 
     pL = np.zeros(NtL)
     xL = np.zeros(NtL)
@@ -1237,18 +1241,26 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
             if tL[i] < tLim[0]:
                 pL[i], vxL[i], vyL[i] = pLim[0], vxLim[0], vyLim[0]
                 break
-            elif tL[i] >= tLim[j] and tL[i] < tLim[j + 1]:
-                # Commented out the interpolation code as it's commented in the original MATLAB code
-                # tFac = (tL[i] - tLim[j]) / (tLim[j+1] - tLim[j])
-                pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
+            elif tLim[j] <= tL[i] < tLim[j + 1]:
+                tFac = (tL[i] - tLim[j]) / (tLim[j + 1] - tLim[j])
+                if ap1 == 1:
+                    pL[i] = pLim[j] + tFac * (pLim[j + 1] - pLim[j])
+                    vxL[i] = vxLim[j] + tFac * (vxLim[j + 1] - vxLim[j])
+                    vyL[i] = vyLim[j] + tFac * (vyLim[j + 1] - vyLim[j])
+                else:
+                    pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
                 break
             elif tL[i] >= tLim[Nlim - 1]:
                 pL[i], vxL[i], vyL[i] = pLim[Nlim - 1], vxLim[Nlim - 1], vyLim[Nlim - 1]
 
     xL[0], yL[0] = x0, y0
     for i in range(1, NtL):
-        xL[i] = xL[i - 1] + dtm * vxL[i - 1]
-        yL[i] = yL[i - 1] + dtm * vyL[i - 1]
+        if ap2 == 1:
+            xL[i] = xL[i - 1] + 0.5 * dtm * (vxL[i - 1] + vxL[i])
+            yL[i] = yL[i - 1] + 0.5 * dtm * (vyL[i - 1] + vyL[i])
+        else:
+            xL[i] = xL[i - 1] + dtm * vxL[i - 1]
+            yL[i] = yL[i - 1] + dtm * vyL[i - 1]
 
     p = np.interp(t, tL, pL)
     vx = np.interp(t, tL, vxL)
@@ -1275,8 +1287,8 @@ def runTraj():
     s = 1000
     h = 130
     dat = ReadLaserTrajectory(loc, s, h)
-    datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt)
-    datTrajClip = GetLaserTrajectory(dat, xClip, yClip, t0, dt, Nt)
+    datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt, [1, 1])
+    datTrajClip = GetLaserTrajectory(dat, xClip, yClip, t0, dt, Nt, [1, 1])
 
     timeStep = datTrajCam.get("t")
     camXPos = datTrajCam.get("x")
