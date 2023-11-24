@@ -947,7 +947,7 @@ def runProcessing():
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/cmos/snap_{i}.tiff",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/cmos_-0.002/snap_{i}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
             OverrideColorPalette="BlackBackground",
@@ -1064,9 +1064,9 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt, ap):
 def runTraj():
     loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
     Nt = 356
-    xCam = 0.02
+    xCam = 0.018
     yCam = 0.02
-    xClip = -0.015
+    xClip = -0.017
     yClip = -0.015
     t0 = 0
     dt = 2e-5

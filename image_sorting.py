@@ -32,8 +32,8 @@ def copy_images_with_exact_numbers_in_title(
     return f"Copied images with titles containing exact numbers {updated_numbers} with prefix '{prefix}' to {destination_folder}"
 
 
-source_folder = r"C:\Users\Aashman Sharma\Documents\Paraview\cmos"  # Replace with your source folder path
-destination_folder = r"C:\Users\Aashman Sharma\Documents\Paraview\Test10_[1,1]_box"  # Replace with your destination folder path
+source_folder = r"C:\Users\Aashman Sharma\Documents\Paraview\cmos_-0.002"  # Replace with your source folder path
+destination_folder = r"C:\Users\Aashman Sharma\Documents\Paraview\Test_Cases_11-21-23\cmos_x-0.002"  # Replace with your destination folder path
 exact_numbers_in_title = [
     10,
     25,

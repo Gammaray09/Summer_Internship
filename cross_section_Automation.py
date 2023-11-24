@@ -137,6 +137,8 @@ def runProcessing():
     # Create a new 'Render View'
     renderView1 = CreateView("RenderView")
     renderView1.AxesGrid = "GridAxes3DActor"
+    renderView1.OrientationAxesVisibility = 0
+    renderView1.AxesGrid.Visibility = 0
     renderView1.StereoType = "Crystal Eyes"
     renderView1.CameraFocalDisk = 1.0
     renderView1.CameraParallelProjection = 1
@@ -194,6 +196,18 @@ def runProcessing():
     meshBlock1Display.PolarAxes = "PolarAxesRepresentation"
     meshBlock1Display.ScalarOpacityUnitDistance = 0.002457596786255209
 
+    # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+    meshBlock1Display.OSPRayScaleFunction.Points = [
+        423.0,
+        0.0,
+        0.5,
+        0.0,
+        423.0625,
+        1.0,
+        0.5,
+        0.0,
+    ]
+
     # create a new 'FLSGRF Extract Particles'
     hotspots = FLSGRFExtractParticles(
         registrationName="Hot spots", Input=flsgrf6pmelt400p1000130um
@@ -226,6 +240,18 @@ def runProcessing():
     hotspotsDisplay.ScalarOpacityUnitDistance = 0.03343245831802152
     hotspotsDisplay.OpacityArrayName = ["POINTS", "Magnitude"]
 
+    # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+    hotspotsDisplay.OSPRayScaleFunction.Points = [
+        423.0,
+        0.0,
+        0.5,
+        0.0,
+        423.0625,
+        1.0,
+        0.5,
+        0.0,
+    ]
+
     # create a new 'Logo'
     fLOW3DLOGO = Logo(registrationName="FLOW-3D LOGO")
 
@@ -246,12 +272,6 @@ def runProcessing():
 
     # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
     pressureLUT.ApplyPreset("Cool to Warm", True)
-
-    # get color transfer function/color map for 'Temperature'
-    temperatureLUT = GetColorTransferFunction("Temperature")
-
-    # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-    temperatureLUT.ApplyPreset("Cool to Warm", True)
 
     # create a new 'FLSGRF IsoObject'
     fluid = FLSGRFIsoObject(registrationName="Fluid", Input=flsgrf6pmelt400p1000130um)
@@ -326,6 +346,18 @@ def runProcessing():
     fluidDisplay.PolarAxes = "PolarAxesRepresentation"
     fluidDisplay.ScalarOpacityUnitDistance = 0.00342998138298535
     fluidDisplay.OpacityArrayName = ["POINTS", "Normals"]
+
+    # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+    fluidDisplay.OSPRayScaleFunction.Points = [
+        423.0,
+        0.0,
+        0.5,
+        0.0,
+        423.0625,
+        1.0,
+        0.5,
+        0.0,
+    ]
 
     # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
     fluidDisplay.ScaleTransferFunction.Points = [
@@ -620,21 +652,6 @@ def runProcessing():
 
     # get color transfer function/color map for 'SolidificationTime'
     solidificationTimeLUT = GetColorTransferFunction("SolidificationTime")
-    solidificationTimeLUT.RGBPoints = [
-        9.891147101370734e-07,
-        0.231373,
-        0.298039,
-        0.752941,
-        0.0034944820468467697,
-        0.865003,
-        0.865003,
-        0.865003,
-        0.006987974978983402,
-        0.705882,
-        0.0156863,
-        0.14902,
-    ]
-    solidificationTimeLUT.ScalarRangeInitialized = 1.0
 
     # Hide the scalar bar for this color map if no visible data is colored by it.
     HideScalarBarIfNotNeeded(solidificationTimeLUT, renderView1)
@@ -645,36 +662,80 @@ def runProcessing():
     # reset view to fit data
     renderView1.ResetCamera(False)
 
+    # get color transfer function/color map for 'Temperature'
+    temperatureLUT = GetColorTransferFunction("Temperature")
+
     # get opacity transfer function/opacity map for 'Temperature'
     temperaturePWF = GetOpacityTransferFunction("Temperature")
-    temperaturePWF.Points = [
-        423.025146484375,
-        0.0,
-        0.5,
-        0.0,
-        1841.5760498046875,
-        1.0,
-        0.5,
-        0.0,
+
+    # set active source
+    SetActiveSource(flsgrf6pmelt400p1000130um)
+
+    # create a new 'FLSGRF Isosurfaces'
+    fLSGRFIsosurfaces1 = FLSGRFIsosurfaces(
+        registrationName="FLSGRFIsosurfaces1", Input=flsgrf6pmelt400p1000130um
+    )
+    fLSGRFIsosurfaces1.Surface = ["", "", "", "", ""]
+    fLSGRFIsosurfaces1.Box = "Box"
+    fLSGRFIsosurfaces1.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
     ]
-    temperaturePWF.ScalarRangeInitialized = 1
 
-    # hide data in view
-    Hide(time, renderView1)
+    # init the 'Box' selected for 'Box'
+    fLSGRFIsosurfaces1.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    fLSGRFIsosurfaces1.Box.Length = [
+        0.14225888310465962,
+        0.14221314317546785,
+        0.028215383179485798,
+    ]
 
-    # hide data in view
-    Hide(fLOW3DLOGO, renderView1)
+    # toggle 3D widget visibility (only when running from the GUI)
+    Show3DWidgets(proxy=fLSGRFIsosurfaces1.Box)
 
-    # Apply a preset using its name. Note this may not work as expected when presets have duplicate names.
-    temperatureLUT.ApplyPreset("Blue Orange (divergent)", True)
+    # Properties modified on fLSGRFIsosurfaces1
+    fLSGRFIsosurfaces1.Surface = ["", "", "", "", "Fraction Of Fluid"]
+    fLSGRFIsosurfaces1.IsoValue = 0.2
+    fLSGRFIsosurfaces1.a3DClip = 1
 
-    # Properties modified on fluid
-    fluid.IsoValue = 0.02
-    fluid.Colors = ["Pressure", "Temperature"]
-
-    # Properties modified on fluid.Box
-    fluid.Box.UseReferenceBounds = 1
-    fluid.Box.Bounds = [
+    # Properties modified on fLSGRFIsosurfaces1.Box
+    fLSGRFIsosurfaces1.Box.UseReferenceBounds = 1
+    fLSGRFIsosurfaces1.Box.Bounds = [
         0.0195,
         0.0205,
         0.005,
@@ -682,64 +743,96 @@ def runProcessing():
         -0.00720769,
         0.0210077,
     ]
-    fluid.Box.Position = [0.0, 0.0, 0.0]
-    fluid.Box.Length = [1.0, 1.0, 1.0]
+    fLSGRFIsosurfaces1.Box.Position = [0.0, 0.0, 0.0]
+    fLSGRFIsosurfaces1.Box.Length = [1.0, 1.0, 1.0]
 
-    # update the view to ensure updated data information
-    renderView1.Update()
+    # show data in view
+    fLSGRFIsosurfaces1Display = Show(
+        fLSGRFIsosurfaces1, renderView1, "GeometryRepresentation"
+    )
 
-    # Properties modified on animationScene1
-    animationScene1.AnimationTime = 0.0
+    # trace defaults for the display properties.
+    fLSGRFIsosurfaces1Display.Representation = "Surface"
+    fLSGRFIsosurfaces1Display.ColorArrayName = [None, ""]
+    fLSGRFIsosurfaces1Display.SelectTCoordArray = "None"
+    fLSGRFIsosurfaces1Display.SelectNormalArray = "Normals"
+    fLSGRFIsosurfaces1Display.SelectTangentArray = "None"
+    fLSGRFIsosurfaces1Display.OSPRayScaleArray = "Cell Type"
+    fLSGRFIsosurfaces1Display.OSPRayScaleFunction = "PiecewiseFunction"
+    fLSGRFIsosurfaces1Display.SelectOrientationVectors = "None"
+    fLSGRFIsosurfaces1Display.ScaleFactor = 0.0120719688013196
+    fLSGRFIsosurfaces1Display.SelectScaleArray = "Cell Type"
+    fLSGRFIsosurfaces1Display.GlyphType = "Arrow"
+    fLSGRFIsosurfaces1Display.GlyphTableIndexArray = "Cell Type"
+    fLSGRFIsosurfaces1Display.GaussianRadius = 0.00060359844006598
+    fLSGRFIsosurfaces1Display.SetScaleArray = ["POINTS", "Cell Type"]
+    fLSGRFIsosurfaces1Display.ScaleTransferFunction = "PiecewiseFunction"
+    fLSGRFIsosurfaces1Display.OpacityArray = ["POINTS", "Cell Type"]
+    fLSGRFIsosurfaces1Display.OpacityTransferFunction = "PiecewiseFunction"
+    fLSGRFIsosurfaces1Display.DataAxesGrid = "GridAxesRepresentation"
+    fLSGRFIsosurfaces1Display.PolarAxes = "PolarAxesRepresentation"
 
-    # get the time-keeper
-    timeKeeper1 = GetTimeKeeper()
+    # init the 'PiecewiseFunction' selected for 'OSPRayScaleFunction'
+    fLSGRFIsosurfaces1Display.OSPRayScaleFunction.Points = [
+        423.0,
+        0.0,
+        0.5,
+        0.0,
+        423.0625,
+        1.0,
+        0.5,
+        0.0,
+    ]
+    # hide color bar/color legend
+    fLSGRFIsosurfaces1Display.SetScalarBarVisibility(renderView1, False)
 
-    # toggle 3D widget visibility (only when running from the GUI)
-    Show3DWidgets(proxy=fluid.Box)
+    # set scalar coloring
+    ColorBy(fLSGRFIsosurfaces1Display, ("POINTS", "Temperature"))
 
-    # change representation type
-    fluidDisplay.SetRepresentationType("Points")
+    # rescale color and/or opacity maps used to include current data range
+    fLSGRFIsosurfaces1Display.RescaleTransferFunctionToDataRange(True, False)
 
-    # change representation type
-    fluidDisplay.SetRepresentationType("Point Gaussian")
+    # show color bar/color legend
+    fLSGRFIsosurfaces1Display.SetScalarBarVisibility(renderView1, True)
 
-    # change representation type
-    fluidDisplay.SetRepresentationType("Outline")
+    # get color transfer function/color map for 'Temperature'
+    temperatureLUT = GetColorTransferFunction("Temperature")
 
-    # change representation type
-    fluidDisplay.SetRepresentationType("Point Gaussian")
-
-    # change representation type
-    fluidDisplay.SetRepresentationType("Points")
-
-    # change representation type
-    fluidDisplay.SetRepresentationType("Surface")
-
-    # Properties modified on fluid
-    fluid.a3DClip = 1
-
-    # Properties modified on fluid.Box
-    fluid.Box.Bounds = [0.0195, 0.0205, 0.005, 0.035, -0.00720769, 0.0210077]
-
-    # update the view to ensure updated data information
-    renderView1.Update()
-
-    # reset view to fit data
-    renderView1.ResetCamera(False)
-
-    # reset view to fit data
-    renderView1.ResetCamera(False)
-
-    # reset view to fit data
-    renderView1.ResetCamera(False)
+    # get opacity transfer function/opacity map for 'Temperature'
+    temperaturePWF = GetOpacityTransferFunction("Temperature")
 
     # update the view to ensure updated data information
     renderView1.Update()
 
     # -----------------------------All Code Above is auto generated by Trace--------------------------------------------
+    # find source
+    time = FindSource("Time")
 
-    # hides fluid and hotspot data
-    Hide(hotspots, renderView1)
+    # get active view
+    renderView1 = GetActiveViewOrCreate("RenderView")
+
+    # hide data in view
+    Hide(time, renderView1)
+
+    # find source
+    fLOW3DLOGO = FindSource("FLOW-3D LOGO")
+
+    Hot_spots = FindSource("Hot spots")
+
+    Hide(Hot_spots, renderView1)
+
+    # hide data in view
+    Hide(fLOW3DLOGO, renderView1)
+
+    # find source
+    fluid = FindSource("Fluid")
+
+    # hide data in view
+    Hide(fluid, renderView1)
+
+    fLSGRFIsosurfaces1Display = Show(
+        fLSGRFIsosurfaces1, renderView1, "GeometryRepresentation"
+    )
 
     ColorBy(fluidDisplay, ("POINTS", "Temperature"))
 
@@ -785,28 +878,44 @@ def runProcessing():
     # corresponding index in cameraPos and clipPos arrays. After camera/clip are at correct position a
     # screenshot is taken and saved to a specific folder
 
-    for i in range(5):
+    x_low = 0.0196
+    x_high = 0.0205
+    y_low = 0.005
+    y_high = 0.035
+
+    for i in range(len(timeStep)):
         # Sets animation to current timestep
         animationScene.AnimationTime = timeStep[i]
         renderView1.Update()
 
         # Gets corresponding postion value based on timestep index
-        fluid.IsoValue = 0.02
-        new_camera_position = [camXPos[i], camYPos[i], 0.0068047]
-        new_camera_focal_point = [camXPos[i], camYPos[i], 0.0068047]
-        new_camera_view_up = [0, 1, 0]
-
-        fluid.Box.UseReferenceBounds = 1
-        fluid.Box.Bounds = [
-            0.0195,
-            0.0205,
-            0.005,
-            0.035,
+        fLSGRFIsosurfaces1.IsoValue = 0.02
+        fLSGRFIsosurfaces1.Box.Bounds = [
+            x_low,
+            x_high,
+            y_low,
+            y_high,
             -0.00720769,
             0.0210077,
         ]
-        fluid.Box.Position = [0.0, 0.0, 0.0]
-        fluid.Box.Length = [1.0, 1.0, 1.0]
+
+        try:
+            if camXPos[i] < camXPos[i + 1]:
+                x_low += 0.002
+                x_high += 0.002
+            elif camXPos[i] > camXPos[i + 1]:
+                x_low -= 0.002
+                x_high -= 0.002
+            elif camYPos[i] < camXPos[i + 1]:
+                y_low += 0.0025
+                y_high += 0.0025
+        except:
+            print("End of Array")
+
+        new_camera_position = [camXPos[i], camYPos[i], 0.0068047]
+        # Estimated Focal point
+        new_camera_focal_point = [(camXPos[i]) / 10, camYPos[i], 0.0068047]
+        new_camera_view_up = [0, 0, 1]
 
         temperatureLUT.RescaleTransferFunction(300.0, 3000.0)
 
@@ -860,25 +969,29 @@ def ReadLaserTrajectory(loc, s, h):
     return dat
 
 
-def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
+def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt, ap):
+    nFac = 10
+    ap1, ap2 = ap
     t = t0 + dt * np.linspace(0, Nt - 1, Nt)
+
     p = np.zeros(Nt)
     x = np.zeros(Nt)
     y = np.zeros(Nt)
     vx = np.zeros(Nt)
     vy = np.zeros(Nt)
 
-    tLim = dat[:, 0]
-    vxLim = dat[:, 1]
-    vyLim = dat[:, 2]
-    pLim = dat[:, 3]
+    tLim, vxLim, vyLim, pLim = dat.T
 
-    Nlim = dat.shape[0]
+    Nlim = len(dat)
     dtLim = np.diff(tLim)
-    dtm = np.min(dtLim)
+    dtm = np.min(dtLim) / nFac
     tM = np.max(t)
-    NtL = int(np.ceil(tM / dtm))
+    NtL = int(np.ceil(tM / dtm)) + 1
+
     tL = t0 + dtm * np.linspace(0, NtL - 1, NtL)
+
+    # print(max(tL))
+    # print(max(t))
 
     pL = np.zeros(NtL)
     xL = np.zeros(NtL)
@@ -891,18 +1004,26 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
             if tL[i] < tLim[0]:
                 pL[i], vxL[i], vyL[i] = pLim[0], vxLim[0], vyLim[0]
                 break
-            elif tL[i] >= tLim[j] and tL[i] < tLim[j + 1]:
-                # Commented out the interpolation code as it's commented in the original MATLAB code
-                # tFac = (tL[i] - tLim[j]) / (tLim[j+1] - tLim[j])
-                pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
+            elif tLim[j] <= tL[i] < tLim[j + 1]:
+                tFac = (tL[i] - tLim[j]) / (tLim[j + 1] - tLim[j])
+                if ap1 == 1:
+                    pL[i] = pLim[j] + tFac * (pLim[j + 1] - pLim[j])
+                    vxL[i] = vxLim[j] + tFac * (vxLim[j + 1] - vxLim[j])
+                    vyL[i] = vyLim[j] + tFac * (vyLim[j + 1] - vyLim[j])
+                else:
+                    pL[i], vxL[i], vyL[i] = pLim[j], vxLim[j], vyLim[j]
                 break
             elif tL[i] >= tLim[Nlim - 1]:
                 pL[i], vxL[i], vyL[i] = pLim[Nlim - 1], vxLim[Nlim - 1], vyLim[Nlim - 1]
 
     xL[0], yL[0] = x0, y0
     for i in range(1, NtL):
-        xL[i] = xL[i - 1] + dtm * vxL[i - 1]
-        yL[i] = yL[i - 1] + dtm * vyL[i - 1]
+        if ap2 == 1:
+            xL[i] = xL[i - 1] + 0.5 * dtm * (vxL[i - 1] + vxL[i])
+            yL[i] = yL[i - 1] + 0.5 * dtm * (vyL[i - 1] + vyL[i])
+        else:
+            xL[i] = xL[i - 1] + dtm * vxL[i - 1]
+            yL[i] = yL[i - 1] + dtm * vyL[i - 1]
 
     p = np.interp(t, tL, pL)
     vx = np.interp(t, tL, vxL)
@@ -920,14 +1041,14 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt):
 def runTraj():
     loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
     Nt = 356
-    xCam = 0.0215
+    xCam = 0.215
     yCam = 0.02
     t0 = 0
     dt = 1.9e-5
     s = 1000
     h = 130
     dat = ReadLaserTrajectory(loc, s, h)
-    datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt)
+    datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt, [1, 1])
 
     timeStep = datTrajCam.get("t")
     camXPos = datTrajCam.get("x")
