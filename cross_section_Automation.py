@@ -906,7 +906,7 @@ def runProcessing():
             elif camXPos[i] > camXPos[i + 1]:
                 x_low -= 0.002
                 x_high -= 0.002
-            elif camYPos[i] < camXPos[i + 1]:
+            elif camYPos[i] < camYPos[i + 1]:
                 y_low += 0.0025
                 y_high += 0.0025
         except:
@@ -923,7 +923,7 @@ def runProcessing():
         renderView1.CameraPosition = new_camera_position
         renderView1.CameraFocalPoint = new_camera_focal_point
         renderView1.CameraViewUp = new_camera_view_up
-        renderView1.CameraParallelScale = 0.03545
+        renderView1.CameraParallelScale = 0.014718
         renderView1.CameraParallelProjection = 1
 
         renderView1.Update()
