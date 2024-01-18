@@ -11,6 +11,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+X_LOW = 0.0196
+X_HIGH = 0.0205
+Y_LOW = 0.005
+Y_HIGH = 0.035
+
+
 def runProcessing():
     ResetSession()
     #### disable automatic camera reset on 'Show'
@@ -386,291 +392,6 @@ def runProcessing():
     # rescale color and/or opacity maps used to exactly fit the current data range
     fluidDisplay.RescaleTransferFunctionToDataRange(False, True)
 
-    # create a new 'FLSGRF IsoObject'
-    openVolume = FLSGRFIsoObject(
-        registrationName="Open Volume", Input=flsgrf6pmelt400p1000130um
-    )
-    openVolume.Surface = "Fluid"
-    openVolume.Box = "Box"
-    openVolume.Colors = [
-        "Cell Type",
-        "Cell Volume Fraction",
-        "Component Number",
-        "Cooling Rate R",
-        "Diagnostics: Cumulative Fluid Fraction Error",
-        "Diagnostics: Nf Values",
-        "Diagnostics: Pressure Iteration Residual",
-        "Dynamic Viscosity",
-        "Evaporation Pressure",
-        "Fraction Of Fluid",
-        "Liquid Region Label",
-        "Macroscopic Density",
-        "Macroscopic Energy Of Fluid #1",
-        "Mass Source Rate Per Unit Open Volume",
-        "Melt Region",
-        "Normalized Drag Coefficient",
-        "Phase Change Mass Flux",
-        "Pressure",
-        "Solid Fraction",
-        "Static Contact Angle",
-        "Surface Tension Pressure",
-        "Temperature",
-        "Temperature Gradient DT/dx",
-        "Temperature Gradient DT/dy",
-        "Temperature Gradient DT/dz",
-        "Temperature Gradient G",
-        "Velocity",
-        "Volume Fraction After AVRCK Adjustment",
-        "Volume Source Rate Per Unit Open Volume",
-        "X-velocity",
-        "Y-velocity",
-        "Z-velocity",
-        "vtkGhostType",
-    ]
-
-    # init the 'Box' selected for 'Box'
-    openVolume.Box.Position = [
-        -0.0010720646241679788,
-        -0.0011556369718164206,
-        -0.007207692600786686,
-    ]
-    openVolume.Box.Length = [
-        0.14225888310465962,
-        0.14221314317546785,
-        0.028215383179485798,
-    ]
-
-    # create a new 'FLSGRF IsoObject'
-    solid = FLSGRFIsoObject(registrationName="Solid", Input=flsgrf6pmelt400p1000130um)
-    solid.Surface = "Fluid"
-    solid.Box = "Box"
-    solid.Colors = [
-        "Cell Type",
-        "Cell Volume Fraction",
-        "Component Number",
-        "Cooling Rate R",
-        "Diagnostics: Cumulative Fluid Fraction Error",
-        "Diagnostics: Nf Values",
-        "Diagnostics: Pressure Iteration Residual",
-        "Dynamic Viscosity",
-        "Evaporation Pressure",
-        "Fraction Of Fluid",
-        "Liquid Region Label",
-        "Macroscopic Density",
-        "Macroscopic Energy Of Fluid #1",
-        "Mass Source Rate Per Unit Open Volume",
-        "Melt Region",
-        "Normalized Drag Coefficient",
-        "Phase Change Mass Flux",
-        "Pressure",
-        "Solid Fraction",
-        "Static Contact Angle",
-        "Surface Tension Pressure",
-        "Temperature",
-        "Temperature Gradient DT/dx",
-        "Temperature Gradient DT/dy",
-        "Temperature Gradient DT/dz",
-        "Temperature Gradient G",
-        "Velocity",
-        "Volume Fraction After AVRCK Adjustment",
-        "Volume Source Rate Per Unit Open Volume",
-        "X-velocity",
-        "Y-velocity",
-        "Z-velocity",
-        "vtkGhostType",
-    ]
-
-    # init the 'Box' selected for 'Box'
-    solid.Box.Position = [
-        -0.0010720646241679788,
-        -0.0011556369718164206,
-        -0.007207692600786686,
-    ]
-    solid.Box.Length = [0.14225888310465962, 0.14221314317546785, 0.028215383179485798]
-
-    # create a new 'FLSGRF IsoObject'
-    voidFluid2 = FLSGRFIsoObject(
-        registrationName="Void/Fluid 2", Input=flsgrf6pmelt400p1000130um
-    )
-    voidFluid2.Surface = "Fluid"
-    voidFluid2.Box = "Box"
-    voidFluid2.Colors = [
-        "Cell Type",
-        "Cell Volume Fraction",
-        "Component Number",
-        "Cooling Rate R",
-        "Diagnostics: Cumulative Fluid Fraction Error",
-        "Diagnostics: Nf Values",
-        "Diagnostics: Pressure Iteration Residual",
-        "Dynamic Viscosity",
-        "Evaporation Pressure",
-        "Fraction Of Fluid",
-        "Liquid Region Label",
-        "Macroscopic Density",
-        "Macroscopic Energy Of Fluid #1",
-        "Mass Source Rate Per Unit Open Volume",
-        "Melt Region",
-        "Normalized Drag Coefficient",
-        "Phase Change Mass Flux",
-        "Pressure",
-        "Solid Fraction",
-        "Static Contact Angle",
-        "Surface Tension Pressure",
-        "Temperature",
-        "Temperature Gradient DT/dx",
-        "Temperature Gradient DT/dy",
-        "Temperature Gradient DT/dz",
-        "Temperature Gradient G",
-        "Velocity",
-        "Volume Fraction After AVRCK Adjustment",
-        "Volume Source Rate Per Unit Open Volume",
-        "X-velocity",
-        "Y-velocity",
-        "Z-velocity",
-        "vtkGhostType",
-    ]
-
-    # init the 'Box' selected for 'Box'
-    voidFluid2.Box.Position = [
-        -0.0010720646241679788,
-        -0.0011556369718164206,
-        -0.007207692600786686,
-    ]
-    voidFluid2.Box.Length = [
-        0.14225888310465962,
-        0.14221314317546785,
-        0.028215383179485798,
-    ]
-
-    # create a new 'FLSGRF IsoObject'
-    liquid = FLSGRFIsoObject(registrationName="Liquid", Input=flsgrf6pmelt400p1000130um)
-    liquid.Surface = "Fluid"
-    liquid.Box = "Box"
-    liquid.Colors = [
-        "Cell Type",
-        "Cell Volume Fraction",
-        "Component Number",
-        "Cooling Rate R",
-        "Diagnostics: Cumulative Fluid Fraction Error",
-        "Diagnostics: Nf Values",
-        "Diagnostics: Pressure Iteration Residual",
-        "Dynamic Viscosity",
-        "Evaporation Pressure",
-        "Fraction Of Fluid",
-        "Liquid Region Label",
-        "Macroscopic Density",
-        "Macroscopic Energy Of Fluid #1",
-        "Mass Source Rate Per Unit Open Volume",
-        "Melt Region",
-        "Normalized Drag Coefficient",
-        "Phase Change Mass Flux",
-        "Pressure",
-        "Solid Fraction",
-        "Static Contact Angle",
-        "Surface Tension Pressure",
-        "Temperature",
-        "Temperature Gradient DT/dx",
-        "Temperature Gradient DT/dy",
-        "Temperature Gradient DT/dz",
-        "Temperature Gradient G",
-        "Velocity",
-        "Volume Fraction After AVRCK Adjustment",
-        "Volume Source Rate Per Unit Open Volume",
-        "X-velocity",
-        "Y-velocity",
-        "Z-velocity",
-        "vtkGhostType",
-    ]
-
-    # init the 'Box' selected for 'Box'
-    liquid.Box.Position = [
-        -0.0010720646241679788,
-        -0.0011556369718164206,
-        -0.007207692600786686,
-    ]
-    liquid.Box.Length = [0.14225888310465962, 0.14221314317546785, 0.028215383179485798]
-
-    # create a new 'FLSGRF IsoObject'
-    solidifiedLiquid = FLSGRFIsoObject(
-        registrationName="Solidified Liquid", Input=flsgrf6pmelt400p1000130um
-    )
-    solidifiedLiquid.Surface = "Fluid"
-    solidifiedLiquid.Box = "Box"
-    solidifiedLiquid.Colors = [
-        "Cell Type",
-        "Cell Volume Fraction",
-        "Component Number",
-        "Cooling Rate R",
-        "Diagnostics: Cumulative Fluid Fraction Error",
-        "Diagnostics: Nf Values",
-        "Diagnostics: Pressure Iteration Residual",
-        "Dynamic Viscosity",
-        "Evaporation Pressure",
-        "Fraction Of Fluid",
-        "Liquid Region Label",
-        "Macroscopic Density",
-        "Macroscopic Energy Of Fluid #1",
-        "Mass Source Rate Per Unit Open Volume",
-        "Melt Region",
-        "Normalized Drag Coefficient",
-        "Phase Change Mass Flux",
-        "Pressure",
-        "Solid Fraction",
-        "Static Contact Angle",
-        "Surface Tension Pressure",
-        "Temperature",
-        "Temperature Gradient DT/dx",
-        "Temperature Gradient DT/dy",
-        "Temperature Gradient DT/dz",
-        "Temperature Gradient G",
-        "Velocity",
-        "Volume Fraction After AVRCK Adjustment",
-        "Volume Source Rate Per Unit Open Volume",
-        "X-velocity",
-        "Y-velocity",
-        "Z-velocity",
-        "vtkGhostType",
-    ]
-
-    # init the 'Box' selected for 'Box'
-    solidifiedLiquid.Box.Position = [
-        -0.0010720646241679788,
-        -0.0011556369718164206,
-        -0.007207692600786686,
-    ]
-    solidifiedLiquid.Box.Length = [
-        0.14225888310465962,
-        0.14221314317546785,
-        0.028215383179485798,
-    ]
-
-    # show data in view
-    hotspotsDisplay = Show(hotspots, renderView1, "UnstructuredGridRepresentation")
-
-    # rescale color and/or opacity maps used to exactly fit the current data range
-    hotspotsDisplay.RescaleTransferFunctionToDataRange(False, True)
-
-    # get color transfer function/color map for 'SolidificationTime'
-    solidificationTimeLUT = GetColorTransferFunction("SolidificationTime")
-
-    # Hide the scalar bar for this color map if no visible data is colored by it.
-    HideScalarBarIfNotNeeded(solidificationTimeLUT, renderView1)
-
-    # set active source
-    SetActiveSource(fluid)
-
-    # reset view to fit data
-    renderView1.ResetCamera(False)
-
-    # get color transfer function/color map for 'Temperature'
-    temperatureLUT = GetColorTransferFunction("Temperature")
-
-    # get opacity transfer function/opacity map for 'Temperature'
-    temperaturePWF = GetOpacityTransferFunction("Temperature")
-
-    # set active source
-    SetActiveSource(flsgrf6pmelt400p1000130um)
-
     # create a new 'FLSGRF Isosurfaces'
     fLSGRFIsosurfaces1 = FLSGRFIsosurfaces(
         registrationName="FLSGRFIsosurfaces1", Input=flsgrf6pmelt400p1000130um
@@ -783,6 +504,292 @@ def runProcessing():
         0.5,
         0.0,
     ]
+
+    # create a new 'FLSGRF IsoObject'
+    solidifiedLiquid = FLSGRFIsoObject(
+        registrationName="Solidified Liquid", Input=flsgrf6pmelt400p1000130um
+    )
+    solidifiedLiquid.Surface = "Fluid"
+    solidifiedLiquid.Box = "Box"
+    solidifiedLiquid.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
+    ]
+
+    # init the 'Box' selected for 'Box'
+    solidifiedLiquid.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    solidifiedLiquid.Box.Length = [
+        0.14225888310465962,
+        0.14221314317546785,
+        0.028215383179485798,
+    ]
+
+    # create a new 'FLSGRF IsoObject'
+    liquid = FLSGRFIsoObject(registrationName="Liquid", Input=flsgrf6pmelt400p1000130um)
+    liquid.Surface = "Fluid"
+    liquid.Box = "Box"
+    liquid.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
+    ]
+
+    # init the 'Box' selected for 'Box'
+    liquid.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    liquid.Box.Length = [0.14225888310465962, 0.14221314317546785, 0.028215383179485798]
+
+    # create a new 'FLSGRF IsoObject'
+    solid = FLSGRFIsoObject(registrationName="Solid", Input=flsgrf6pmelt400p1000130um)
+    solid.Surface = "Fluid"
+    solid.Box = "Box"
+    solid.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
+    ]
+
+    # init the 'Box' selected for 'Box'
+    solid.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    solid.Box.Length = [0.14225888310465962, 0.14221314317546785, 0.028215383179485798]
+
+    # create a new 'FLSGRF IsoObject'
+    openVolume = FLSGRFIsoObject(
+        registrationName="Open Volume", Input=flsgrf6pmelt400p1000130um
+    )
+    openVolume.Surface = "Fluid"
+    openVolume.Box = "Box"
+    openVolume.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
+    ]
+
+    # init the 'Box' selected for 'Box'
+    openVolume.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    openVolume.Box.Length = [
+        0.14225888310465962,
+        0.14221314317546785,
+        0.028215383179485798,
+    ]
+
+    # create a new 'FLSGRF IsoObject'
+    voidFluid2 = FLSGRFIsoObject(
+        registrationName="Void/Fluid 2", Input=flsgrf6pmelt400p1000130um
+    )
+    voidFluid2.Surface = "Fluid"
+    voidFluid2.Box = "Box"
+    voidFluid2.Colors = [
+        "Cell Type",
+        "Cell Volume Fraction",
+        "Component Number",
+        "Cooling Rate R",
+        "Diagnostics: Cumulative Fluid Fraction Error",
+        "Diagnostics: Nf Values",
+        "Diagnostics: Pressure Iteration Residual",
+        "Dynamic Viscosity",
+        "Evaporation Pressure",
+        "Fraction Of Fluid",
+        "Liquid Region Label",
+        "Macroscopic Density",
+        "Macroscopic Energy Of Fluid #1",
+        "Mass Source Rate Per Unit Open Volume",
+        "Melt Region",
+        "Normalized Drag Coefficient",
+        "Phase Change Mass Flux",
+        "Pressure",
+        "Solid Fraction",
+        "Static Contact Angle",
+        "Surface Tension Pressure",
+        "Temperature",
+        "Temperature Gradient DT/dx",
+        "Temperature Gradient DT/dy",
+        "Temperature Gradient DT/dz",
+        "Temperature Gradient G",
+        "Velocity",
+        "Volume Fraction After AVRCK Adjustment",
+        "Volume Source Rate Per Unit Open Volume",
+        "X-velocity",
+        "Y-velocity",
+        "Z-velocity",
+        "vtkGhostType",
+    ]
+
+    # init the 'Box' selected for 'Box'
+    voidFluid2.Box.Position = [
+        -0.0010720646241679788,
+        -0.0011556369718164206,
+        -0.007207692600786686,
+    ]
+    voidFluid2.Box.Length = [
+        0.14225888310465962,
+        0.14221314317546785,
+        0.028215383179485798,
+    ]
+
+    # show data in view
+    hotspotsDisplay = Show(hotspots, renderView1, "UnstructuredGridRepresentation")
+
+    # rescale color and/or opacity maps used to exactly fit the current data range
+    hotspotsDisplay.RescaleTransferFunctionToDataRange(False, True)
+
+    # get color transfer function/color map for 'SolidificationTime'
+    solidificationTimeLUT = GetColorTransferFunction("SolidificationTime")
+
+    # Hide the scalar bar for this color map if no visible data is colored by it.
+    HideScalarBarIfNotNeeded(solidificationTimeLUT, renderView1)
+
+    # set active source
+    SetActiveSource(fluid)
+
+    # reset view to fit data
+    renderView1.ResetCamera(False)
+
+    # get color transfer function/color map for 'Temperature'
+    temperatureLUT = GetColorTransferFunction("Temperature")
+
+    # get opacity transfer function/opacity map for 'Temperature'
+    temperaturePWF = GetOpacityTransferFunction("Temperature")
+
+    # set active source
+    SetActiveSource(flsgrf6pmelt400p1000130um)
+
     # hide color bar/color legend
     fLSGRFIsosurfaces1Display.SetScalarBarVisibility(renderView1, False)
 
@@ -860,9 +867,21 @@ def runProcessing():
     camXPos = []
     camYPos = []
     timeStep = []
+    clipXPosLow = []
+    clipYPosLow = []
+    clipXPosHigh = []
+    clipYPosHigh = []
 
     # Runs Anant's trajectory functions
-    timeStep, camXPos, camYPos = runTraj()
+    (
+        timeStep,
+        camXPos,
+        camYPos,
+        clipXPosLow,
+        clipYPosLow,
+        clipXPosHigh,
+        clipYPosHigh,
+    ) = runTraj()
 
     # Prints all time and trajectory values in terminal
     i = 0
@@ -878,11 +897,6 @@ def runProcessing():
     # corresponding index in cameraPos and clipPos arrays. After camera/clip are at correct position a
     # screenshot is taken and saved to a specific folder
 
-    x_low = 0.0196
-    x_high = 0.0205
-    y_low = 0.005
-    y_high = 0.035
-
     for i in range(len(timeStep)):
         # Sets animation to current timestep
         animationScene.AnimationTime = timeStep[i]
@@ -891,26 +905,13 @@ def runProcessing():
         # Gets corresponding postion value based on timestep index
         fLSGRFIsosurfaces1.IsoValue = 0.02
         fLSGRFIsosurfaces1.Box.Bounds = [
-            x_low,
-            x_high,
-            y_low,
-            y_high,
+            clipXPosLow[i],
+            clipXPosHigh[i],
+            clipYPosLow[i],
+            clipYPosHigh[i],
             -0.00720769,
             0.0210077,
         ]
-
-        try:
-            if camXPos[i] < camXPos[i + 1]:
-                x_low += 0.002
-                x_high += 0.002
-            elif camXPos[i] > camXPos[i + 1]:
-                x_low -= 0.002
-                x_high -= 0.002
-            elif camYPos[i] < camYPos[i + 1]:
-                y_low += 0.0025
-                y_high += 0.0025
-        except:
-            print("End of Array")
 
         new_camera_position = [camXPos[i], camYPos[i], 0.0068047]
         # Estimated Focal point
@@ -931,7 +932,7 @@ def runProcessing():
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output_side/snap_{i}.tiff",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output_side_back/snap_{i}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
         )
@@ -1041,8 +1042,12 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt, ap):
 def runTraj():
     loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
     Nt = 356
-    xCam = 0.215
+    xCam = -0.215
     yCam = 0.02
+    xLowClip = X_LOW
+    xHighClip = X_HIGH
+    yLowClip = Y_LOW
+    yHighClip = Y_HIGH
     t0 = 0
     dt = 1.9e-5
     s = 1000
@@ -1050,11 +1055,26 @@ def runTraj():
     dat = ReadLaserTrajectory(loc, s, h)
     datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt, [1, 1])
 
+    datTrajClipLow = GetLaserTrajectory(dat, xLowClip, yLowClip, t0, dt, Nt, [1, 1])
+    datTrajClipHigh = GetLaserTrajectory(dat, xHighClip, yHighClip, t0, dt, Nt, [1, 1])
+
     timeStep = datTrajCam.get("t")
     camXPos = datTrajCam.get("x")
     camYPos = datTrajCam.get("y")
+    clipXPosLow = datTrajClipLow.get("x")
+    clipYPosLow = datTrajClipLow.get("y")
+    clipXPosHigh = datTrajClipHigh.get("x")
+    clipYPosHigh = datTrajClipHigh.get("y")
 
-    return timeStep, camXPos, camYPos
+    return (
+        timeStep,
+        camXPos,
+        camYPos,
+        clipXPosLow,
+        clipYPosLow,
+        clipXPosHigh,
+        clipYPosHigh,
+    )
 
 
 # --------------------------------------------------------------------------------------------------------------
