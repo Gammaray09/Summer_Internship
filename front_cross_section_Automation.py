@@ -915,7 +915,7 @@ def runProcessing():
 
         new_camera_position = [camXPos[i], camYPos[i], 0.0068047]
         # Estimated Focal point
-        new_camera_focal_point = [(camXPos[i]) / 10, camYPos[i], 0.0068047]
+        new_camera_focal_point = [(camXPos[i]) - 0.001, camYPos[i], 0.0068047]
         new_camera_view_up = [0, 0, 1]
 
         temperatureLUT.RescaleTransferFunction(300.0, 3000.0)
@@ -927,7 +927,7 @@ def runProcessing():
         renderView1.CameraParallelScale = 0.014718
         renderView1.CameraParallelProjection = 1
 
-        renderView1.Update()
+        renderView1.Update()        
 
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
