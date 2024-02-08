@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import csv
 
+X_LOW = 0.0196
+X_HIGH = 0.0205
+Y_LOW = 0.005
+Y_HIGH = 0.035
 
 def ReadLaserTrajectory(loc, s, h):
     print("runTraj")
@@ -103,24 +107,74 @@ def GetLaserTrajectory(dat, x0, y0, t0, dt, Nt, ap):
     return datTraj
 
 
+
 def runTraj():
-    loc = r"C:\Users\Aashman Sharma\Documents\Paraview\Time_Series"
+    loc = r"C:\Users\aashm\Documents\Paraview\Time_Series"
     Nt = 356
-    xCam = 0.02
+    xCam = 0.215
     yCam = 0.02
+    xLowClip = X_LOW
+    xHighClip = X_HIGH
+    yLowClip = Y_LOW
+    yHighClip = Y_HIGH
     t0 = 0
-    dt = 2e-5
+    dt = 1.9e-5
     s = 1000
     h = 130
     dat = ReadLaserTrajectory(loc, s, h)
     datTrajCam = GetLaserTrajectory(dat, xCam, yCam, t0, dt, Nt, [1, 1])
 
+    datTrajClipLow = GetLaserTrajectory(dat, xLowClip, yLowClip, t0, dt, Nt, [1, 1])
+    datTrajClipHigh = GetLaserTrajectory(dat, xHighClip, yHighClip, t0, dt, Nt, [1, 1])
+
     timeStep = datTrajCam.get("t")
     camXPos = datTrajCam.get("x")
     camYPos = datTrajCam.get("y")
+    clipXPosLow = datTrajClipLow.get("x")
+    clipYPosLow = datTrajClipLow.get("y")
+    clipXPosHigh = datTrajClipHigh.get("x")
+    clipYPosHigh = datTrajClipHigh.get("y")
 
-    return timeStep, camXPos, camYPos
+    return (
+        timeStep,
+        camXPos,
+        camYPos,
+        clipXPosLow,
+        clipYPosLow,
+        clipXPosHigh,
+        clipYPosHigh,
+    )
 
 
-timeStep, camXPos, camYPos = runTraj()
-print(camYPos)
+camXPos = []
+camYPos = []
+timeStep = []
+clipXPosLow = []
+clipYPosLow = []
+clipXPosHigh = []
+clipYPosHigh = []
+
+(
+    timeStep,
+    camXPos,
+    camYPos,
+    clipXPosLow,
+    clipYPosLow,
+    clipXPosHigh,
+    clipYPosHigh,
+) = runTraj()
+
+data = list(zip(timeStep, camXPos,
+    camYPos,
+    clipXPosLow,
+    clipXPosHigh,
+    clipYPosLow,
+    clipYPosHigh,))
+
+file_path = r"C:\Users\aashm\Documents\Paraview\Data Dump\data.csv"
+with open(file_path, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Time', 'Cam X', 'Cam Y', 'Clip X Low','Clip X High','Clip Y Low','Clip Y High']) 
+    writer.writerows(data)
+
+print("CSV file has been saved to:", file_path)

@@ -833,7 +833,7 @@ def runProcessing():
 
     # find source
     fluid = FindSource("Fluid")
-
+    
     # hide data in view
     Hide(fluid, renderView1)
 
@@ -1065,6 +1065,21 @@ def runTraj():
     clipYPosLow = datTrajClipLow.get("y")
     clipXPosHigh = datTrajClipHigh.get("x")
     clipYPosHigh = datTrajClipHigh.get("y")
+
+    data = list(zip(timeStep, camXPos,
+        camYPos,
+        clipXPosLow,
+        clipXPosHigh,
+        clipYPosLow,
+        clipYPosHigh,))
+
+    file_path =  f"C:/Users/Aashman Sharma/Documents/Paraview/output_side_front/Data.csv"
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Time', 'Cam X', 'Cam Y', 'Clip X Low','Clip X High','Clip Y Low','Clip Y High']) 
+        writer.writerows(data)
+
+    print("CSV file has been saved to:", file_path)
 
     return (
         timeStep,
