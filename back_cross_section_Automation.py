@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-X_LOW = 0.0196
-X_HIGH = 0.0205
+X_LOW = 0.0213
+X_HIGH = 0.1411868184804916
 Y_LOW = 0.005
 Y_HIGH = 0.035
 
@@ -903,10 +903,10 @@ def runProcessing():
         renderView1.Update()
 
         # Gets corresponding postion value based on timestep index
-        fLSGRFIsosurfaces1.IsoValue = 0.02
+        fLSGRFIsosurfaces1.IsoValue = 0.5
         fLSGRFIsosurfaces1.Box.Bounds = [
             clipXPosLow[i],
-            clipXPosHigh[i],
+            X_HIGH,
             clipYPosLow[i],
             clipYPosHigh[i],
             -0.00720769,
@@ -915,7 +915,7 @@ def runProcessing():
 
         new_camera_position = [camXPos[i], camYPos[i], 0.0068047]
         # Estimated Focal point
-        new_camera_focal_point = [(camXPos[i]) / 10, camYPos[i], 0.0068047]
+        new_camera_focal_point = [(camXPos[i]) + 0.001, camYPos[i], 0.0068047]
         new_camera_view_up = [0, 0, 1]
 
         temperatureLUT.RescaleTransferFunction(300.0, 3000.0)
@@ -932,9 +932,10 @@ def runProcessing():
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output_side_back/snap_{i}.tiff",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output/snap_{i}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
+            OverrideColorPalette="DefaultBackground",
         )
 
 

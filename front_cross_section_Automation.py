@@ -10,9 +10,10 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-X_LOW = 0.0196
-X_HIGH = 0.0205
+# The true value of the X low can range from 0.0201-0.0209
+# The true value of the X High can range from 0.0210-0.0218
+X_LOW = -0.001072064624167979
+X_HIGH = 0.0213
 Y_LOW = 0.005
 Y_HIGH = 0.035
 
@@ -833,7 +834,7 @@ def runProcessing():
 
     # find source
     fluid = FindSource("Fluid")
-    
+
     # hide data in view
     Hide(fluid, renderView1)
 
@@ -903,9 +904,9 @@ def runProcessing():
         renderView1.Update()
 
         # Gets corresponding postion value based on timestep index
-        fLSGRFIsosurfaces1.IsoValue = 0.02
+        fLSGRFIsosurfaces1.IsoValue = 0.5
         fLSGRFIsosurfaces1.Box.Bounds = [
-            clipXPosLow[i],
+            X_LOW,
             clipXPosHigh[i],
             clipYPosLow[i],
             clipYPosHigh[i],
@@ -927,14 +928,15 @@ def runProcessing():
         renderView1.CameraParallelScale = 0.014718
         renderView1.CameraParallelProjection = 1
 
-        renderView1.Update()        
+        renderView1.Update()
 
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output_side_front/snap_{i}.tiff",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output/snap_{i}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
+            OverrideColorPalette="DefaultBackground",
         )
 
 
@@ -1066,21 +1068,6 @@ def runTraj():
     clipXPosHigh = datTrajClipHigh.get("x")
     clipYPosHigh = datTrajClipHigh.get("y")
 
-    data = list(zip(timeStep, camXPos,
-        camYPos,
-        clipXPosLow,
-        clipXPosHigh,
-        clipYPosLow,
-        clipYPosHigh,))
-
-    file_path =  f"C:/Users/Aashman Sharma/Documents/Paraview/output_side_front/Data.csv"
-    with open(file_path, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Time', 'Cam X', 'Cam Y', 'Clip X Low','Clip X High','Clip Y Low','Clip Y High']) 
-        writer.writerows(data)
-
-    print("CSV file has been saved to:", file_path)
-
     return (
         timeStep,
         camXPos,
@@ -1090,6 +1077,42 @@ def runTraj():
         clipXPosHigh,
         clipYPosHigh,
     )
+
+
+"""
+    data = list(
+        zip(
+            timeStep,
+            camXPos,
+            camYPos,
+            clipXPosLow,
+            clipXPosHigh,
+            clipYPosLow,
+            clipYPosHigh,
+        )
+    )
+
+
+    file_path = (
+        f"C:/Users/Aashman Sharma/Documents/Paraview/output/Data.csv"
+    )
+    with open(file_path, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            [
+                "Time",
+                "Cam X",
+                "Cam Y",
+                "Clip X Low",
+                "Clip X High",
+                "Clip Y Low",
+                "Clip Y High",
+            ]
+        )
+        writer.writerows(data)
+
+    print("CSV file has been saved to:", file_path)
+    """
 
 
 # --------------------------------------------------------------------------------------------------------------
