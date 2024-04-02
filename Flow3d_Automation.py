@@ -836,6 +836,7 @@ def runProcessing():
     clip1Display.OpacityArrayName = ["POINTS", "Normals"]
 
     # init the 'PiecewiseFunction' selected for 'ScaleTransferFunction'
+
     clip1Display.ScaleTransferFunction.Points = [
         -1.0,
         0.0,
