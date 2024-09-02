@@ -931,12 +931,26 @@ def runProcessing():
 
         # save screenshot in folder
         scientific_notation = format(timeStep[i], ".2e")
+        num = formatName(i)
         SaveScreenshot(
-            f"C:/Users/Aashman Sharma/Documents/Paraview/output/snap_{i}.tiff",
+            f"C:/Users/Aashman Sharma/Documents/Paraview/output_back/snap.{num}.tiff",
             case1flsgrf6pmelt400p1000130um,
             ImageResolution=[1632, 1632],
             OverrideColorPalette="DefaultBackground",
         )
+
+
+def formatName(i):
+    num = str(i)
+    numZeros = 4 - len(num)
+    if numZeros == 3:
+        return f"000{i}"
+    elif numZeros == 2:
+        return f"00{i}"
+    elif numZeros == 1:
+        return f"0{i}"
+    else:
+        return f"{i}"
 
 
 # -----------------------------------------------Anant's Functions----------------------------------------------
